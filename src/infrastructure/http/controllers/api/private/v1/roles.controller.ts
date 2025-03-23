@@ -9,7 +9,7 @@ import {
   Body,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { AbstractCreateRoleUseCase } from '@/core/abstractions/use-cases/roles/create-role-use-case.abstract';
+import { AbstractCreateRoleUseCase } from '@/core/abstractions/use-cases/roles/create-role.use-case.abstract';
 import { Left } from '@/shared/either';
 import { z } from 'zod';
 import { UserAlreadyExistsError } from '@/core/errors/services/users/user-validation-service/UserAlreadyExistsError.error';

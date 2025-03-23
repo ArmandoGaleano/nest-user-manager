@@ -1,6 +1,8 @@
+import { AbstractAutoSerializableClass } from '@/core/abstractions/base/auto-serializable-class.abstract';
 import type { IUpdateUserRepositoryDto } from '../../../../interfaces/dtos/repositories/users/update-user-repository.dto.interface';
 
 export abstract class AbstractUpdateUserRepositoryDto
+  extends AbstractAutoSerializableClass<IUpdateUserRepositoryDto>
   implements IUpdateUserRepositoryDto
 {
   abstract readonly id: IUpdateUserRepositoryDto['id'];

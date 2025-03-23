@@ -44,18 +44,35 @@ export const updateUserDtoZodSchema = z
       .nativeEnum(EnumUserModelDocument)
       .transform((val) => val as UserModelDocumentType)
       .optional(),
-    roles: z.array(z.string().trim().min(1)).optional(),
+    updatedAt: z.date(),
   })
   .refine(
     (data) =>
       data.firstName ||
       data.lastName ||
       data.birthdate ||
-      data.roles ||
       data.document ||
       data.documentType,
     {
       message:
         'Pelo menos um dos campos (firstName, lastName, birthdate, roles, document ou documentType) devem ser informados!',
+    },
+  )
+  .refine(
+    (data) => {
+      if (
+        (!!data?.document?.trim()?.length === true &&
+          !!data?.documentType?.trim()?.length === false) ||
+        (!!data?.document?.trim()?.length === false &&
+          !!data?.documentType?.trim()?.length === true)
+      ) {
+        return false;
+      }
+
+      return true;
+    },
+    {
+      message:
+        'Se informar um documento, deve informar o tipo de documento e vice-versa!',
     },
   );

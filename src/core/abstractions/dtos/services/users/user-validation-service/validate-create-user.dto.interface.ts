@@ -11,7 +11,7 @@ export abstract class AbstractValidateCreateUserDto
   abstract birthdate: IValidateCreateUserDto['birthdate'];
   abstract document: IValidateCreateUserDto['document'];
   abstract documentType: IValidateCreateUserDto['documentType'];
+  abstract roles: IValidateCreateUserDto['roles'];
   abstract createdAt: IValidateCreateUserDto['createdAt'];
   abstract updatedAt: IValidateCreateUserDto['updatedAt'];
-  abstract roles: IValidateCreateUserDto['roles'];
 }

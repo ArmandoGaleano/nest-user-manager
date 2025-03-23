@@ -15,13 +15,13 @@ export abstract class AbstractUserValidationService
   implements IUserValidationService
 {
   public abstract validateCreateUserSchema(
-    dto: AbstractCreateUserRepositoryDto,
+    dto: AbstractValidateCreateUserDto,
   ): Either<
     | z.ZodError<{
         [x: string]: any;
       }>
     | InternalServerError,
-    AbstractCreateUserRepositoryDto
+    AbstractValidateCreateUserDto
   >;
   public abstract validateReadUserSchema(
     dto: AbstractReadUserRepositoryDto,
@@ -60,6 +60,18 @@ export abstract class AbstractUserValidationService
       | InternalServerError
       | UserAlreadyExistsError,
       AbstractValidateCreateUserDto
+    >
+  >;
+  public abstract validateUpdateUser(
+    dto: AbstractUpdateUserRepositoryDto,
+  ): Promise<
+    Either<
+      | z.ZodError<{
+          [x: string]: any;
+        }>
+      | InternalServerError
+      | UserAlreadyExistsError,
+      AbstractUpdateUserRepositoryDto
     >
   >;
 }

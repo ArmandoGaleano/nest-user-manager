@@ -1,6 +1,10 @@
+import { AbstractAutoSerializableClass } from '@/core/abstractions/base/auto-serializable-class.abstract';
 import { IUserRepositoryDto } from '@/core/interfaces/dtos/repositories/users/user-repository.dto.interface';
 
-export abstract class AbstractUserRepositoryDto implements IUserRepositoryDto {
+export abstract class AbstractUserRepositoryDto
+  extends AbstractAutoSerializableClass<IUserRepositoryDto>
+  implements IUserRepositoryDto
+{
   abstract readonly id: IUserRepositoryDto['id'];
   abstract email: IUserRepositoryDto['email'];
   abstract password: IUserRepositoryDto['password'];

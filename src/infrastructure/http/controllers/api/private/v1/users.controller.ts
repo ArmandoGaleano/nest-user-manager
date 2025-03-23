@@ -13,12 +13,24 @@ import { z } from 'zod';
 import { Left } from '@/shared/either';
 
 import { AbstractCreateUserUseCase } from '@/core/abstractions/use-cases/users/create-user.use-case.abstract';
+import { AbstractReadUserUseCase } from '@/core/abstractions/use-cases/users/read-user.use-case.abstract';
+import { AbstractUpdateUserUseCase } from '@/core/abstractions/use-cases/users/update-user.use-case.abstract';
+import { AbstractDeleteUserUseCase } from '@/core/abstractions/use-cases/users/delete-user.use-case.abstract';
+
+import { CreateUserUseCaseDto } from '@/core/dtos/use-cases/users/create-user-use-case.dto';
+import { ReadUserRepositoryDto } from '@/core/dtos/repositories/users/read-user-repository.dto';
+import { UpdateUserUseCaseDto } from '@/core/dtos/use-cases/users/update-user-use-case.dto';
+import { DeleteUserRepositoryDto } from '@/core/dtos/repositories/users/delete-user-repository.dto';
 
 import { UserAlreadyExistsError } from '@/core/errors/services/users/user-validation-service/UserAlreadyExistsError.error';
-import { CreateUserUseCaseDto } from '@/core/dtos/use-cases/users/create-user-use-case.dto';
 @Controller('users')
 export class UsersV1Controller {
-  constructor(private createUserUseCase: AbstractCreateUserUseCase) {}
+  constructor(
+    private createUserUseCase: AbstractCreateUserUseCase,
+    private readUserUseCase: AbstractReadUserUseCase,
+    private updateUserUseCase: AbstractUpdateUserUseCase,
+    private deleteUserUseCase: AbstractDeleteUserUseCase,
+  ) {}
 
   @Post()
   async createUser(
@@ -46,134 +58,130 @@ export class UsersV1Controller {
       }
 
       request.res?.status(201);
-      return eitherCreateUserResult.value;
+
+      return {
+        id: eitherCreateUserResult.value.id,
+        email: eitherCreateUserResult.value.email,
+        password: eitherCreateUserResult.value.password,
+        firstName: eitherCreateUserResult.value.firstName,
+        lastName: eitherCreateUserResult.value.lastName,
+        birthdate: eitherCreateUserResult.value.birthdate,
+        roles: eitherCreateUserResult.value.roles.map((role) => ({
+          id: role.id,
+          name: role.name,
+          description: role.description,
+          createdAt: role.createdAt,
+          updatedAt: role.updatedAt,
+        })),
+        createdAt: eitherCreateUserResult.value.createdAt,
+        updatedAt: eitherCreateUserResult.value.updatedAt,
+      };
     } catch {
       console.log('error');
     }
   }
 
-  // @Get()
-  // async readUser(@Req() request: Request, @Query() readUserDto: ReadUserDto) {
-  //   try {
-  //     const httpResponse = await this.UsersV1Service.readUser(readUserDto);
+  @Get()
+  async readUser(
+    @Req() request: Request,
+    @Query() readUserDto: ReadUserRepositoryDto,
+  ) {
+    try {
+      const eitherReadUserResult =
+        await this.readUserUseCase.execute(readUserDto);
 
-  //     // Error
-  //     if (httpResponse.result instanceof HttpError) {
-  //       const { statusCode, message = '', data = null } = httpResponse.result;
+      if (eitherReadUserResult instanceof Left) {
+        if (eitherReadUserResult.value instanceof z.ZodError) {
+          request.res?.status(400);
 
-  //       console.error('Controller error: readUser');
-  //       console.error(message);
-  //       const contentType = httpResponse.result.contentType;
+          return { messages: eitherReadUserResult.value.errors };
+        }
 
-  //       if (contentType === 'application/json') {
-  //         request.res?.status(statusCode);
+        request.res?.status(500);
+        return { message: eitherReadUserResult.value.message };
+      }
 
-  //         return { data };
-  //       }
+      if (!eitherReadUserResult.value) {
+        request.res?.status(404);
+        return { message: 'User not found' };
+      }
 
-  //       request.res?.status(statusCode);
+      request.res?.status(200);
+      return {
+        ...eitherReadUserResult.value,
+      };
+    } catch (error) {
+      console.error('Controller error: readUser');
+      console.error(error);
 
-  //       return { message };
-  //     }
+      request.res?.status(500);
+      return { message: 'Internal server error' };
+    }
+  }
 
-  //     // Success
-  //     const { statusCode, data } = httpResponse.result;
+  @Patch()
+  async updateUser(
+    @Req() request: Request,
+    @Body() updateUserDto: UpdateUserUseCaseDto,
+  ) {
+    try {
+      const eitherCreateUserResult =
+        await this.updateUserUseCase.execute(updateUserDto);
 
-  //     if (httpResponse.result.contentType) {
-  //       request.res?.contentType(httpResponse.result.contentType);
-  //     }
+      if (eitherCreateUserResult instanceof Left) {
+        if (eitherCreateUserResult.value instanceof z.ZodError) {
+          request.res?.status(400);
 
-  //     request.res?.status(statusCode);
+          return { messages: eitherCreateUserResult.value.errors };
+        }
 
-  //     return data;
-  //   } catch (error) {
-  //     console.error('Controller error: readUser');
-  //     console.error(error);
+        if (eitherCreateUserResult.value instanceof UserAlreadyExistsError) {
+          request.res?.status(409);
+          return { message: eitherCreateUserResult.value.message };
+        }
 
-  //     request.res?.status(500);
-  //     return { message: 'Internal server error' };
-  //   }
-  // }
+        request.res?.status(500);
+        return { message: eitherCreateUserResult.value.message };
+      }
 
-  // @Patch()
-  // async updateUser(
-  //   @Req() request: Request,
-  //   @Body() updateUserDto: UpdateUserDto,
-  // ) {
-  //   try {
-  //     const httpResponse = await this.UsersV1Service.updateUser(updateUserDto);
+      request.res?.status(201);
+      return {
+        ...eitherCreateUserResult.value,
+      };
+    } catch {
+      console.log('error');
+    }
+  }
 
-  //     if (httpResponse.result instanceof HttpError) {
-  //       const { statusCode, message = '', data = null } = httpResponse.result;
+  @Delete()
+  async deleteUser(
+    @Req() request: Request,
+    @Query() deleteUserDto: DeleteUserRepositoryDto,
+  ) {
+    try {
+      const eitherDeleteUserResult =
+        await this.deleteUserUseCase.execute(deleteUserDto);
 
-  //       console.error('Controller error: updateUser');
-  //       console.error(message);
-  //       const contentType = httpResponse.result.contentType;
+      if (eitherDeleteUserResult instanceof Left) {
+        if (eitherDeleteUserResult.value instanceof z.ZodError) {
+          request.res?.status(400);
 
-  //       if (contentType === 'application/json') {
-  //         request.res?.status(statusCode);
+          return { messages: eitherDeleteUserResult.value.errors };
+        }
 
-  //         return { data };
-  //       }
+        request.res?.status(500);
+        return { message: eitherDeleteUserResult.value.message };
+      }
 
-  //       request.res?.status(statusCode);
+      if (eitherDeleteUserResult.value === true) {
+        request.res?.status(204);
+        return;
+      }
 
-  //       return { message };
-  //     }
-
-  //     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  //     const { statusCode, data } = httpResponse.result;
-
-  //     request.res?.status(statusCode);
-
-  //     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-  //     return data;
-  //   } catch (error) {
-  //     console.error('Controller error: updateUser');
-  //     console.error(error);
-
-  //     request.res?.status(500);
-  //     return { message: 'Internal server error' };
-  //   }
-  // }
-
-  // @Delete()
-  // async deleteUser(
-  //   @Req() request: Request,
-  //   @Query() deleteUserDto: DeleteUserDto,
-  // ) {
-  //   try {
-  //     const httpResponse = await this.UsersV1Service.deleteUser(deleteUserDto);
-
-  //     if (httpResponse.result instanceof HttpError) {
-  //       const { statusCode, message = '', data = null } = httpResponse.result;
-
-  //       console.error('Controller error: deleteUser');
-  //       console.error(message);
-  //       const contentType = httpResponse.result.contentType;
-
-  //       if (contentType === 'application/json') {
-  //         request.res?.status(statusCode);
-
-  //         return { data };
-  //       }
-
-  //       request.res?.status(statusCode);
-
-  //       return { message };
-  //     }
-
-  //     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  //     const { statusCode, data } = httpResponse.result;
-  //     request.res?.status(statusCode);
-  //     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-  //     return data;
-  //   } catch (error) {
-  //     console.error('Controller error: deleteUser');
-  //     console.error(error);
-
-  //     request.res?.status(500);
-  //     return { message: 'Internal server error' };
-  //   }
-  // }
+      request.res?.status(404);
+      return { message: 'User not found' };
+    } catch {
+      console.log('error');
+    }
+  }
 }

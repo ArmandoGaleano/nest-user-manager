@@ -22,6 +22,7 @@ import { UserRepositoryDto } from '@/core/dtos/repositories/users/user-repositor
 import { UserEntity } from '@/domain/users/user.entity';
 import { AbstractUserEntity } from '@/core/abstractions/entities/user.abstract';
 import { RoleNotFoundError } from '@/core/errors/services/roles/roles-validation-service/RoleNotFoundError.error';
+import { CreateUserRepositoryDto } from '@/core/dtos/repositories/users/create-user-repository.dto';
 
 @Injectable()
 export class CreateUserUseCase extends AbstractCreateUserUseCase {
@@ -76,8 +77,14 @@ export class CreateUserUseCase extends AbstractCreateUserUseCase {
       const roleIds = eitherValidateRolesExists.value.map((role) => role.id);
 
       // Create user
-      const eitherCreateUser =
-        await this.UsersRepositoryService.createUser(validatedUserData);
+      const eitherCreateUser = await this.UsersRepositoryService.createUser(
+        new CreateUserRepositoryDto({
+          ...validatedUserData,
+          password: await this.CryptoHelperService.hashPassword(
+            validatedUserData.password,
+          ),
+        }),
+      );
 
       if (eitherCreateUser instanceof Left) {
         return left(eitherCreateUser.value);
@@ -105,7 +112,7 @@ export class CreateUserUseCase extends AbstractCreateUserUseCase {
 
       return right(
         new UserEntity({
-          ...validatedUserData,
+          ...eitherCreateUser.value,
           roles: eitherValidateRolesExists.value,
         }),
       );

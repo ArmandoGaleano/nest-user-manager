@@ -18,6 +18,7 @@ import { AbstractDeleteUserRepositoryDto } from '@/core/abstractions/dtos/reposi
 import { InternalServerError } from '@/core/errors/InternalServerError.error';
 import { UserAlreadyExistsError } from '../../../../core/errors/services/users/user-validation-service/UserAlreadyExistsError.error';
 import { AbstractValidateCreateUserDto } from '@/core/abstractions/dtos/services/users/user-validation-service/validate-create-user.dto.interface';
+import { updateUserDtoZodSchema } from './schema/update-user-dto-schema';
 
 @Injectable()
 export class UserValidationService extends AbstractUserValidationService {
@@ -40,6 +41,14 @@ export class UserValidationService extends AbstractUserValidationService {
           {
             [x: string]: any;
           }
+        >
+      | z.ZodEffects<
+          z.ZodEffects<
+            z.ZodObject<any>,
+            {
+              [x: string]: any;
+            }
+          >
         >;
     dto: TDto;
   }): Either<
@@ -102,7 +111,7 @@ export class UserValidationService extends AbstractUserValidationService {
   > {
     return this.validateDtoSchema<AbstractUpdateUserRepositoryDto>({
       currentMethodName: 'validateUpdateUser',
-      zodSchema: readUserDtoZodSchema,
+      zodSchema: updateUserDtoZodSchema,
       dto,
     });
   }
@@ -155,18 +164,57 @@ export class UserValidationService extends AbstractUserValidationService {
     return right(validator.value);
   }
 
+  public async validateUpdateUser(
+    dto: AbstractUpdateUserRepositoryDto,
+  ): Promise<
+    Either<
+      | z.ZodError<{
+          [x: string]: any;
+        }>
+      | InternalServerError
+      | UserAlreadyExistsError,
+      AbstractUpdateUserRepositoryDto
+    >
+  > {
+    const validator = this.validateUpdateUserSchema(dto);
+
+    if (validator instanceof Left) {
+      return left(validator.value);
+    }
+
+    if (validator.value.document && validator.value.documentType) {
+      const EitherIsUserRegisted = await this.isUserRegistered({
+        document: validator.value.document,
+        documentType: validator.value.documentType,
+      });
+
+      if (EitherIsUserRegisted instanceof Left) {
+        return left(EitherIsUserRegisted.value);
+      }
+
+      if (EitherIsUserRegisted.value === true) {
+        return left(new UserAlreadyExistsError());
+      }
+    }
+
+    return right(validator.value);
+  }
+
   public async isUserRegistered({
     id,
     email,
     document,
     documentType,
-  }: Pick<UsersModel, 'id' | 'email' | 'document' | 'documentType'>): Promise<
-    Either<InternalServerError, boolean>
-  > {
+  }: Optional<
+    Pick<UsersModel, 'id' | 'email' | 'document' | 'documentType'>,
+    'id' | 'email'
+  >): Promise<Either<InternalServerError, boolean>> {
     try {
       const eitherListSearchByExistentAccount = await Promise.all([
-        this.UserRepositoryService.searchUsers({ id }),
-        this.UserRepositoryService.searchUsers({ email }),
+        id ? this.UserRepositoryService.searchUsers({ id }) : { value: [] },
+        email
+          ? this.UserRepositoryService.searchUsers({ email })
+          : { value: [] },
         this.UserRepositoryService.searchUsers({ document, documentType }),
       ]);
 

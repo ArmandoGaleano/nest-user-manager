@@ -6,7 +6,7 @@ import { Either, left, Left, right } from '@/shared/either';
 import { AbstractUserValidationService } from '@/core/abstractions/services/users/user-validation.service.abstract';
 import { InternalServerError } from '@/core/errors/InternalServerError.error';
 import { z } from 'zod';
-import { AbstractReadUserUseCase } from '@/core/abstractions/dtos/use-cases/users/read-user-use-case.dto.abstract';
+import { AbstractReadUserUseCase } from '@/core/abstractions/use-cases/users/read-user.use-case.abstract';
 
 @Injectable()
 export class ReadUserUseCase extends AbstractReadUserUseCase {

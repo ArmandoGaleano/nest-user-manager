@@ -1,6 +1,8 @@
+import { AbstractAutoSerializableClass } from '@/core/abstractions/base/auto-serializable-class.abstract';
 import type { ICreateRoleRepositoryDto } from '@/core/interfaces/dtos/repositories/roles/create-role-repository.dto.interface';
 
 export abstract class AbstractCreateRoleRepositoryDto
+  extends AbstractAutoSerializableClass<ICreateRoleRepositoryDto>
   implements ICreateRoleRepositoryDto
 {
   abstract id: ICreateRoleRepositoryDto['id'];

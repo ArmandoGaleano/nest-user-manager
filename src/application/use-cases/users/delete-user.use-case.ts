@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { z } from 'zod';
 import { knex } from 'src/infrastructure/persistence/knex';
 
-import { AbstractDeleteUserUseCase } from '@/core/abstractions/use-cases/users/delete-user-use-case.abstract';
+import { AbstractDeleteUserUseCase } from '@/core/abstractions/use-cases/users/delete-user.use-case.abstract';
 import { Either, left, Left, right } from '@/shared/either';
 import { AbstractUserValidationService } from '@/core/abstractions/services/users/user-validation.service.abstract';
 import { InternalServerError } from '@/core/errors/InternalServerError.error';

@@ -11,18 +11,18 @@ import { AbstractRolesValidationService } from '@/core/abstractions/services/rol
 import { RolesValidationService } from '@/application/services/roles/roles-validation-service/roles-validation.service';
 import { UserValidationService } from '@/application/services/users/user-validation-service/user-validation.service';
 import { AbstractCreateUserUseCase } from '@/core/abstractions/use-cases/users/create-user.use-case.abstract';
-import { CreateUserUseCase } from '@/application/use-cases/users/create-user-use-case';
+import { CreateUserUseCase } from '@/application/use-cases/users/create-user.use-case';
 import { AbstractUpdateUserUseCase } from '@/core/abstractions/use-cases/users/update-user.use-case.abstract';
-import { UpdateUserUseCase } from '@/application/use-cases/users/update-user-use-case';
-import { AbstractDeleteUserUseCase } from '@/core/abstractions/use-cases/users/delete-user-use-case.abstract';
-import { DeleteUserUseCase } from '@/application/use-cases/users/delete-user-use-case';
-import { AbstractReadUserUseCase } from '@/core/abstractions/dtos/use-cases/users/read-user-use-case.dto.abstract';
-import { ReadUserUseCase } from '@/application/use-cases/users/read-user-use-case';
+import { UpdateUserUseCase } from '@/application/use-cases/users/update-user.use-case';
+import { AbstractDeleteUserUseCase } from '@/core/abstractions/use-cases/users/delete-user.use-case.abstract';
+import { DeleteUserUseCase } from '@/application/use-cases/users/delete-user.use-case';
+import { AbstractReadUserUseCase } from '@/core/abstractions/use-cases/users/read-user.use-case.abstract';
+import { ReadUserUseCase } from '@/application/use-cases/users/read-user.use-case';
 import { AbstractUserRolesRepositoryService } from '@/core/abstractions/repositories/user-roles.repository.service.abstract';
 import { UserRolesRepositoryService } from '@/infrastructure/persistence/repositories/user_roles/user-roles.repository.service';
 import { RolesRepositoryService } from '@/infrastructure/persistence/repositories/roles/roles.repository.service';
 import { RolesV1Controller } from '@/infrastructure/http/controllers/api/private/v1/roles.controller';
-import { AbstractCreateRoleUseCase } from '@/core/abstractions/use-cases/roles/create-role-use-case.abstract';
+import { AbstractCreateRoleUseCase } from '@/core/abstractions/use-cases/roles/create-role.use-case.abstract';
 import { CreateRoleUseCase } from '@/application/use-cases/roles/create-role-use-case';
 
 @Module({

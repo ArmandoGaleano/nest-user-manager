@@ -57,4 +57,6 @@ export const createUserDtoZodSchema = z.object({
     .nativeEnum(EnumUserModelDocument)
     .transform((val) => val as UserModelDocumentType),
   roles: z.array(z.string().min(1)).min(1).default([]),
+  createdAt: z.date(),
+  updatedAt: z.date(),
 });

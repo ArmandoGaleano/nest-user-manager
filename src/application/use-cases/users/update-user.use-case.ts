@@ -9,6 +9,7 @@ import { AbstractUserRepositoryDto } from '@/core/abstractions/dtos/repositories
 import { InternalServerError } from '@/core/errors/InternalServerError.error';
 import { UpdateUserRepositoryError } from '@/core/errors/repository/users/UpdateUserRepositoryError.error';
 import { AbstractUpdateUserUseCase } from '@/core/abstractions/use-cases/users/update-user.use-case.abstract';
+import { UserAlreadyExistsError } from '@/core/errors/services/users/user-validation-service/UserAlreadyExistsError.error';
 
 @Injectable()
 export class UpdateUserUseCase extends AbstractUpdateUserUseCase {
@@ -26,13 +27,14 @@ export class UpdateUserUseCase extends AbstractUpdateUserUseCase {
           [x: string]: any;
         }>
       | InternalServerError
+      | UserAlreadyExistsError
       | UpdateUserRepositoryError,
       AbstractUserRepositoryDto
     >
   > {
     try {
       const eitherValidateUpdateUserSchema =
-        this.UserValidationService.validateUpdateUserSchema({
+        await this.UserValidationService.validateUpdateUser({
           ...dto,
           updatedAt: this.SystemDateTimeHelperService.getDate(),
         });

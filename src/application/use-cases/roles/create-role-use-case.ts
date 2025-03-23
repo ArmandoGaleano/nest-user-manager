@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { AbstractCreateRoleUseCase } from '@/core/abstractions/use-cases/roles/create-role-use-case.abstract';
+import { AbstractCreateRoleUseCase } from '@/core/abstractions/use-cases/roles/create-role.use-case.abstract';
 import { Either, Left, left } from '@/shared/either';
 import { AbstractCryptoHelperService } from '@/core/abstractions/helpers/crypto-helper.service.abstract';
 import { AbstractRolesRepositoryService } from '@/core/abstractions/repositories/roles.repository.service.abstract';

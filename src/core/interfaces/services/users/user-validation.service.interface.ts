@@ -11,12 +11,12 @@ import { UserAlreadyExistsError } from '@/core/errors/services/users/user-valida
 import { AbstractValidateCreateUserDto } from '@/core/abstractions/dtos/services/users/user-validation-service/validate-create-user.dto.interface';
 
 export interface IUserValidationService {
-  validateCreateUserSchema(dto: AbstractCreateUserRepositoryDto): Either<
+  validateCreateUserSchema(dto: AbstractValidateCreateUserDto): Either<
     | z.ZodError<{
         [x: string]: any;
       }>
     | InternalServerError,
-    AbstractCreateUserRepositoryDto
+    AbstractValidateCreateUserDto
   >;
   validateReadUserSchema(dto: AbstractReadUserRepositoryDto): Either<
     | z.ZodError<{
@@ -47,6 +47,17 @@ export interface IUserValidationService {
       | InternalServerError
       | UserAlreadyExistsError,
       AbstractValidateCreateUserDto
+    >
+  >;
+
+  validateUpdateUser(dto: AbstractUpdateUserRepositoryDto): Promise<
+    Either<
+      | z.ZodError<{
+          [x: string]: any;
+        }>
+      | InternalServerError
+      | UserAlreadyExistsError,
+      AbstractUpdateUserRepositoryDto
     >
   >;
 }

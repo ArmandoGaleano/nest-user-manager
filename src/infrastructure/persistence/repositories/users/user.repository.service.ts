@@ -12,6 +12,7 @@ import { knex } from '@/infrastructure/persistence/knex';
 import { InternalServerError } from '@/core/errors/InternalServerError.error';
 import { CreateUserRepositoryError } from '@/core/errors/repository/users/CreateUserRepositoryError.error';
 import { UpdateUserRepositoryError } from '@/core/errors/repository/users/UpdateUserRepositoryError.error';
+import { UserRepositoryDto } from '@/core/dtos/repositories/users/user-repository.dto';
 
 @Injectable()
 export class UsersRepositoryService extends AbstractUsersRepositoryService {
@@ -47,7 +48,7 @@ export class UsersRepositoryService extends AbstractUsersRepositoryService {
         return left(new CreateUserRepositoryError());
       }
 
-      return right(user[0]);
+      return right(new UserRepositoryDto(user[0]));
     } catch (error) {
       console.error('UserRepositoryService error: createUser');
       console.error(error);
@@ -61,16 +62,23 @@ export class UsersRepositoryService extends AbstractUsersRepositoryService {
     Either<InternalServerError, AbstractUserRepositoryDto | undefined>
   > {
     try {
-      const user = await knex<UsersModel>('users')
-        .where('id', dto.id)
-        .orWhere('email', dto.email)
-        .first();
+      const query = knex<UsersModel>('users');
+
+      if (dto.id) {
+        query.where('id', dto.id);
+      }
+
+      if (dto.email) {
+        query.andWhere('email', dto.email);
+      }
+
+      const user = await query.first();
 
       if (!user?.id?.length) {
         return right(undefined);
       }
 
-      return right(user);
+      return right(new UserRepositoryDto(user));
     } catch (error) {
       console.error('UserRepositoryService error: readUser');
       console.error(error);
@@ -90,22 +98,22 @@ export class UsersRepositoryService extends AbstractUsersRepositoryService {
       const user = await knex<UsersModel>('users')
         .where('id', dto.id)
         .update({
-          password: dto.password,
-          firstName: dto.firstName,
-          lastName: dto.lastName,
-          birthdate: dto.birthdate,
-          document: dto.document,
-          documentType: dto.documentType,
-          updatedAt: dto.updatedAt,
-        })
-        .returning('*')
-        .first();
+          ...Object.entries(dto).reduce((acc, [key, value]) => {
+            if (key !== 'id') {
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+              acc[key] = value;
+            }
 
-      if (!user?.id?.length) {
+            return acc;
+          }, {} as Partial<UsersModel>),
+        })
+        .returning('*');
+
+      if (!user?.[0]?.id?.length) {
         return left(new UpdateUserRepositoryError());
       }
 
-      return right(user);
+      return right(new UserRepositoryDto(user[0]));
     } catch (error) {
       console.error('UserRepositoryService error: updateUser');
       console.error(error);
@@ -206,7 +214,9 @@ export class UsersRepositoryService extends AbstractUsersRepositoryService {
       query.limit(limit).offset(offset);
 
       const users = await query;
-      const result = (users as UsersModel[]) ?? [];
+      const result = ((users as UsersModel[]) ?? []).map(
+        (user) => new UserRepositoryDto(user),
+      );
 
       return right(result);
     } catch (error) {

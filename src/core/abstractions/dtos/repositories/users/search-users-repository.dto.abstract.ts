@@ -1,6 +1,8 @@
+import { AbstractAutoSerializableClass } from '@/core/abstractions/base/auto-serializable-class.abstract';
 import { ISearchUsersRepositoryDto } from '@/core/interfaces/dtos/repositories/users/search-users-repository.dto.interface';
 
 export abstract class AbstractSearchUsersRepositoryDto
+  extends AbstractAutoSerializableClass<ISearchUsersRepositoryDto>
   implements ISearchUsersRepositoryDto
 {
   abstract id?: ISearchUsersRepositoryDto['id'];
