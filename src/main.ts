@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './infrastructure/http/modules/app.module';
+import { AppModule } from './infrastructure/http/modules/router/app.module';
 import dotenv from 'dotenv';
 
 dotenv.config({

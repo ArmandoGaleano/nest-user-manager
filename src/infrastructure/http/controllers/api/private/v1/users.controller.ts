@@ -1,93 +1,179 @@
-import { Body, Controller, Post, Get, Query, Req } from '@nestjs/common';
-import { CreateUserDto } from 'src/application/dtos/users/create-user.dto';
-import { UsersV1Service } from 'src/application/services/users/v1/users.service';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Req,
+  Query,
+  Body,
+} from '@nestjs/common';
 import { Request } from 'express';
-import { knex } from 'src/infrastructure/persistence/knex';
-import { HttpError } from 'src/infrastructure/http/HttpError';
-import { ReadUserDto } from 'src/application/dtos/users/read-user.dto';
+import { z } from 'zod';
+import { Left } from '@/shared/either';
 
+import { AbstractCreateUserUseCase } from '@/core/abstractions/use-cases/users/create-user.use-case.abstract';
+
+import { UserAlreadyExistsError } from '@/core/errors/services/users/user-validation-service/UserAlreadyExistsError.error';
+import { CreateUserUseCaseDto } from '@/core/dtos/use-cases/users/create-user-use-case.dto';
 @Controller('users')
 export class UsersV1Controller {
-  constructor(private readonly UsersV1Service: UsersV1Service) {}
+  constructor(private createUserUseCase: AbstractCreateUserUseCase) {}
 
   @Post()
   async createUser(
     @Req() request: Request,
-    @Body() createUserDto: CreateUserDto,
+    @Body() createUserDto: CreateUserUseCaseDto,
   ) {
     try {
-      const httpResponse = await this.UsersV1Service.create(createUserDto);
+      const eitherCreateUserResult =
+        await this.createUserUseCase.execute(createUserDto);
 
-      if (httpResponse.result instanceof HttpError) {
-        const { statusCode, message = '', data = null } = httpResponse.result;
+      if (eitherCreateUserResult instanceof Left) {
+        if (eitherCreateUserResult.value instanceof z.ZodError) {
+          request.res?.status(400);
 
-        console.error('Controller error: createUser');
-        console.error(message);
-        const contentType = httpResponse.result.contentType;
-
-        if (contentType === 'application/json') {
-          request.res?.status(statusCode);
-
-          return { data };
+          return { messages: eitherCreateUserResult.value.errors };
         }
 
-        request.res?.status(statusCode);
+        if (eitherCreateUserResult.value instanceof UserAlreadyExistsError) {
+          request.res?.status(409);
+          return { message: eitherCreateUserResult.value.message };
+        }
 
-        return { message };
+        request.res?.status(500);
+        return { message: eitherCreateUserResult.value.message };
       }
 
-      const { statusCode, data } = httpResponse.result;
-
-      return request.res?.status(statusCode).send(data);
-    } catch (error) {
-      console.error('Controller error: createUser');
-      console.error(error);
-
-      request.res?.status(500);
-      return { message: 'Internal server error' };
+      request.res?.status(201);
+      return eitherCreateUserResult.value;
+    } catch {
+      console.log('error');
     }
   }
 
-  @Get()
-  async readUser(@Req() request: Request, @Query() readUserDto: ReadUserDto) {
-    try {
-      const httpResponse = await this.UsersV1Service.read(readUserDto);
+  // @Get()
+  // async readUser(@Req() request: Request, @Query() readUserDto: ReadUserDto) {
+  //   try {
+  //     const httpResponse = await this.UsersV1Service.readUser(readUserDto);
 
-      if (httpResponse.result instanceof HttpError) {
-        const { statusCode, message = '', data = null } = httpResponse.result;
+  //     // Error
+  //     if (httpResponse.result instanceof HttpError) {
+  //       const { statusCode, message = '', data = null } = httpResponse.result;
 
-        console.error('Controller error: readUser');
-        console.error(message);
-        const contentType = httpResponse.result.contentType;
+  //       console.error('Controller error: readUser');
+  //       console.error(message);
+  //       const contentType = httpResponse.result.contentType;
 
-        if (contentType === 'application/json') {
-          request.res?.status(statusCode);
+  //       if (contentType === 'application/json') {
+  //         request.res?.status(statusCode);
 
-          return { data };
-        }
+  //         return { data };
+  //       }
 
-        request.res?.status(statusCode);
+  //       request.res?.status(statusCode);
 
-        return { message };
-      }
+  //       return { message };
+  //     }
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const { statusCode, data } = httpResponse.result;
+  //     // Success
+  //     const { statusCode, data } = httpResponse.result;
 
-      if (httpResponse.result.contentType) {
-        request.res?.contentType(httpResponse.result.contentType);
-      }
+  //     if (httpResponse.result.contentType) {
+  //       request.res?.contentType(httpResponse.result.contentType);
+  //     }
 
-      request.res?.status(statusCode);
+  //     request.res?.status(statusCode);
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      return data;
-    } catch (error) {
-      console.error('Controller error: readUser');
-      console.error(error);
+  //     return data;
+  //   } catch (error) {
+  //     console.error('Controller error: readUser');
+  //     console.error(error);
 
-      request.res?.status(500);
-      return { message: 'Internal server error' };
-    }
-  }
+  //     request.res?.status(500);
+  //     return { message: 'Internal server error' };
+  //   }
+  // }
+
+  // @Patch()
+  // async updateUser(
+  //   @Req() request: Request,
+  //   @Body() updateUserDto: UpdateUserDto,
+  // ) {
+  //   try {
+  //     const httpResponse = await this.UsersV1Service.updateUser(updateUserDto);
+
+  //     if (httpResponse.result instanceof HttpError) {
+  //       const { statusCode, message = '', data = null } = httpResponse.result;
+
+  //       console.error('Controller error: updateUser');
+  //       console.error(message);
+  //       const contentType = httpResponse.result.contentType;
+
+  //       if (contentType === 'application/json') {
+  //         request.res?.status(statusCode);
+
+  //         return { data };
+  //       }
+
+  //       request.res?.status(statusCode);
+
+  //       return { message };
+  //     }
+
+  //     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  //     const { statusCode, data } = httpResponse.result;
+
+  //     request.res?.status(statusCode);
+
+  //     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  //     return data;
+  //   } catch (error) {
+  //     console.error('Controller error: updateUser');
+  //     console.error(error);
+
+  //     request.res?.status(500);
+  //     return { message: 'Internal server error' };
+  //   }
+  // }
+
+  // @Delete()
+  // async deleteUser(
+  //   @Req() request: Request,
+  //   @Query() deleteUserDto: DeleteUserDto,
+  // ) {
+  //   try {
+  //     const httpResponse = await this.UsersV1Service.deleteUser(deleteUserDto);
+
+  //     if (httpResponse.result instanceof HttpError) {
+  //       const { statusCode, message = '', data = null } = httpResponse.result;
+
+  //       console.error('Controller error: deleteUser');
+  //       console.error(message);
+  //       const contentType = httpResponse.result.contentType;
+
+  //       if (contentType === 'application/json') {
+  //         request.res?.status(statusCode);
+
+  //         return { data };
+  //       }
+
+  //       request.res?.status(statusCode);
+
+  //       return { message };
+  //     }
+
+  //     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  //     const { statusCode, data } = httpResponse.result;
+  //     request.res?.status(statusCode);
+  //     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  //     return data;
+  //   } catch (error) {
+  //     console.error('Controller error: deleteUser');
+  //     console.error(error);
+
+  //     request.res?.status(500);
+  //     return { message: 'Internal server error' };
+  //   }
+  // }
 }

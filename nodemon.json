@@ -1,9 +1,0 @@
-{
-  "verbose": true,
-  "ext": "ts,js",
-  "watch": ["/nest-users-manager/src"],
-  "legacyWatch": true,
-  "interval": 1000,
-  "exec": "yarn start:dev",
-  "ignore": ["node_modules", "dist"]
-}

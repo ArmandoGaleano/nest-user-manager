@@ -1,0 +1,20 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "target": "ES2020",
+    "outDir": "dist/knex-tmp",
+    "rootDir": "./src/infrastructure/persistence",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "incremental": false,
+    "declaration": false,
+    "declarationMap": false
+  },
+  "include": [
+    "src/infrastructure/persistence/knexfile.ts",
+    "src/infrastructure/persistence/migrations/**/*.ts",
+    "src/infrastructure/persistence/database-models/**/*.d.ts"
+  ]
+}

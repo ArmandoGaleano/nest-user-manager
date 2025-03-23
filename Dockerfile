@@ -17,7 +17,7 @@ COPY . .
 RUN yarn
 
 # Permite a execução do script de inicialização
-RUN chmod +x ./setup/development.sh
+RUN chmod +x ./scripts/setup/production.sh
 
 # Inicializa a aplicação
-ENTRYPOINT ["./setup/development.sh"]
+ENTRYPOINT ["./scripts/setup/production.sh"]
