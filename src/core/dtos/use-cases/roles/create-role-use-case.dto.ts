@@ -9,7 +9,7 @@ export class CreateRoleUseCaseDto extends AbstractCreateRoleUseCaseDto {
     example: 'Admin',
   })
   get name() {
-    return this.dto.name;
+    return this._dto.name;
   }
 
   @ApiProperty({
@@ -18,10 +18,10 @@ export class CreateRoleUseCaseDto extends AbstractCreateRoleUseCaseDto {
     example: 'Administrator',
   })
   get description() {
-    return this.dto.description;
+    return this._dto.description;
   }
 
-  constructor(private dto: ICreateRoleUseCaseDto) {
+  constructor(private _dto: ICreateRoleUseCaseDto) {
     super();
   }
 }

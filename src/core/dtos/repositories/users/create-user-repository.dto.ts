@@ -9,7 +9,7 @@ export class CreateUserRepositoryDto extends AbstractCreateUserRepositoryDto {
     example: 'uuid',
   })
   get id() {
-    return this.dto.id;
+    return this._dto.id;
   }
 
   @ApiProperty({
@@ -19,7 +19,7 @@ export class CreateUserRepositoryDto extends AbstractCreateUserRepositoryDto {
     example: 'example@email.com',
   })
   get email() {
-    return this.dto.email;
+    return this._dto.email;
   }
 
   @ApiProperty({
@@ -28,7 +28,7 @@ export class CreateUserRepositoryDto extends AbstractCreateUserRepositoryDto {
     example: 'password',
   })
   get password() {
-    return this.dto.password;
+    return this._dto.password;
   }
 
   @ApiProperty({
@@ -37,7 +37,7 @@ export class CreateUserRepositoryDto extends AbstractCreateUserRepositoryDto {
     example: 'Mr.',
   })
   get firstName() {
-    return this.dto.firstName;
+    return this._dto.firstName;
   }
 
   @ApiProperty({
@@ -46,7 +46,7 @@ export class CreateUserRepositoryDto extends AbstractCreateUserRepositoryDto {
     example: 'Robot',
   })
   get lastName() {
-    return this.dto.lastName;
+    return this._dto.lastName;
   }
 
   @ApiProperty({
@@ -56,7 +56,7 @@ export class CreateUserRepositoryDto extends AbstractCreateUserRepositoryDto {
     example: '2000-01-01',
   })
   get birthdate() {
-    return this.dto.birthdate;
+    return this._dto.birthdate;
   }
 
   @ApiProperty({
@@ -66,7 +66,7 @@ export class CreateUserRepositoryDto extends AbstractCreateUserRepositoryDto {
     example: 'customer',
   })
   get document() {
-    return this.dto.document;
+    return this._dto.document;
   }
 
   @ApiProperty({
@@ -76,7 +76,7 @@ export class CreateUserRepositoryDto extends AbstractCreateUserRepositoryDto {
     example: 'CPF',
   })
   get documentType() {
-    return this.dto.documentType;
+    return this._dto.documentType;
   }
 
   @ApiProperty({
@@ -86,7 +86,7 @@ export class CreateUserRepositoryDto extends AbstractCreateUserRepositoryDto {
     example: '2021-09-01T00:00:00Z',
   })
   get createdAt() {
-    return this.dto.createdAt;
+    return this._dto.createdAt;
   }
 
   @ApiProperty({
@@ -96,10 +96,10 @@ export class CreateUserRepositoryDto extends AbstractCreateUserRepositoryDto {
     example: '2021-09-01T00:00:00Z',
   })
   get updatedAt() {
-    return this.dto.updatedAt;
+    return this._dto.updatedAt;
   }
 
-  constructor(private dto: ICreateUserRepositoryDto) {
+  constructor(private _dto: ICreateUserRepositoryDto) {
     super();
   }
 }

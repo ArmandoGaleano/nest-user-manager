@@ -10,6 +10,12 @@ import { AbstractDeleteUserRepositoryDto } from '../../dtos/repositories/users/d
 import { InternalServerError } from '@/core/errors/InternalServerError.error';
 import { UserAlreadyExistsError } from '@/core/errors/services/users/user-validation-service/UserAlreadyExistsError.error';
 import { AbstractValidateCreateUserDto } from '../../dtos/services/users/user-validation-service/validate-create-user.dto.interface';
+import { AbstractSearchUsersRepositoryDto } from '../../dtos/repositories/users/search-users-repository.dto.abstract';
+import { IValidateCreateUserDto } from '@/core/interfaces/dtos/services/users/user-validation-service/validate-create-user.dto.interface';
+import { IReadUserRepositoryDto } from '@/core/interfaces/dtos/repositories/users/read-user-repository.dto.interface';
+import { IUpdateUserRepositoryDto } from '@/core/interfaces/dtos/repositories/users/update-user-repository.dto.interface';
+import { IDeleteUserRepositoryDto } from '@/core/interfaces/dtos/repositories/users/delete-user-repository.dto.interface';
+import { ISearchUsersRepositoryDto } from '@/core/interfaces/dtos/repositories/users/search-users-repository.dto.interface';
 
 export abstract class AbstractUserValidationService
   implements IUserValidationService
@@ -21,7 +27,7 @@ export abstract class AbstractUserValidationService
         [x: string]: any;
       }>
     | InternalServerError,
-    AbstractValidateCreateUserDto
+    IValidateCreateUserDto
   >;
   public abstract validateReadUserSchema(
     dto: AbstractReadUserRepositoryDto,
@@ -30,7 +36,7 @@ export abstract class AbstractUserValidationService
         [x: string]: any;
       }>
     | InternalServerError,
-    AbstractReadUserRepositoryDto
+    IReadUserRepositoryDto
   >;
   public abstract validateUpdateUserSchema(
     dto: AbstractUpdateUserRepositoryDto,
@@ -39,7 +45,7 @@ export abstract class AbstractUserValidationService
         [x: string]: any;
       }>
     | InternalServerError,
-    AbstractUpdateUserRepositoryDto
+    IUpdateUserRepositoryDto
   >;
   public abstract validateDeleteUserSchema(
     dto: AbstractDeleteUserRepositoryDto,
@@ -48,8 +54,19 @@ export abstract class AbstractUserValidationService
         [x: string]: any;
       }>
     | InternalServerError,
-    AbstractDeleteUserRepositoryDto
+    IDeleteUserRepositoryDto
   >;
+
+  public abstract validateSearchUsersSchema(
+    dto: AbstractSearchUsersRepositoryDto,
+  ): Either<
+    | z.ZodError<{
+        [x: string]: any;
+      }>
+    | InternalServerError,
+    ISearchUsersRepositoryDto
+  >;
+
   public abstract validateCreateUser(
     dto: AbstractValidateCreateUserDto,
   ): Promise<
@@ -59,7 +76,7 @@ export abstract class AbstractUserValidationService
         }>
       | InternalServerError
       | UserAlreadyExistsError,
-      AbstractValidateCreateUserDto
+      IValidateCreateUserDto
     >
   >;
   public abstract validateUpdateUser(
@@ -71,7 +88,7 @@ export abstract class AbstractUserValidationService
         }>
       | InternalServerError
       | UserAlreadyExistsError,
-      AbstractUpdateUserRepositoryDto
+      IUpdateUserRepositoryDto
     >
   >;
 }

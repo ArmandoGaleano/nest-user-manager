@@ -11,6 +11,7 @@ import { AbstractUpdateRoleRepositoryDto } from '@/core/abstractions/dtos/reposi
 import { AbstractDeleteRoleRepositoryDto } from '@/core/abstractions/dtos/repositories/roles/delete-role-repository.dto.abstract';
 import { AbstractSearchRolesRepositoryDto } from '@/core/abstractions/dtos/repositories/roles/search-roles-repository.dto.abstract';
 import { InternalServerError } from '@/core/errors/InternalServerError.error';
+import { ReadRoleRepositoryDto } from '@/core/dtos/repositories/roles/read-role-repository.dto';
 
 @Injectable()
 export class RolesRepositoryService extends AbstractRolesRepositoryService {
@@ -31,8 +32,6 @@ export class RolesRepositoryService extends AbstractRolesRepositoryService {
           updatedAt: dto.updatedAt,
         })
         .returning<UsersModel[]>('*');
-
-      console.log({ createRoleSuccess });
 
       if (createRoleSuccess?.[0]?.id?.length) {
         return right(new RoleDto(dto));
@@ -108,7 +107,9 @@ export class RolesRepositoryService extends AbstractRolesRepositoryService {
         }));
 
       if (updateRoleSuccess) {
-        const eitherRoleUpdated = await this.readRole({ id: dto.id });
+        const eitherRoleUpdated = await this.readRole(
+          new ReadRoleRepositoryDto({ id: dto.id }),
+        );
 
         if (eitherRoleUpdated instanceof Left) {
           return left(new InternalServerError());
@@ -156,7 +157,6 @@ export class RolesRepositoryService extends AbstractRolesRepositoryService {
   public async searchRoles(
     dto: AbstractSearchRolesRepositoryDto,
   ): Promise<Either<InternalServerError, AbstractRoleRepositoryDto[]>> {
-    console.log({ DTO: dto });
     try {
       const limit = dto.limit ? Math.min(dto.limit, 100) : 10;
       const page = dto.page && dto.page > 0 ? dto.page : 1;

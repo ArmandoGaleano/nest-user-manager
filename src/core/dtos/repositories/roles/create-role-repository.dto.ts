@@ -9,7 +9,7 @@ export class CreateRoleRepositoryDto extends AbstractCreateRoleRepositoryDto {
     example: 'f7b3b2b0-4b7b-4b7b-8b7b-4b7b7b7b7b7b',
   })
   get id() {
-    return this.dto.id;
+    return this._dto.id;
   }
   @ApiProperty({
     type: 'string',
@@ -18,7 +18,7 @@ export class CreateRoleRepositoryDto extends AbstractCreateRoleRepositoryDto {
     example: 'customer',
   })
   get name() {
-    return this.dto.name;
+    return this._dto.name;
   }
 
   @ApiProperty({
@@ -27,7 +27,7 @@ export class CreateRoleRepositoryDto extends AbstractCreateRoleRepositoryDto {
     example: 'Customer role',
   })
   get description() {
-    return this.dto.description;
+    return this._dto.description;
   }
 
   @ApiProperty({
@@ -36,7 +36,7 @@ export class CreateRoleRepositoryDto extends AbstractCreateRoleRepositoryDto {
     example: '2021-09-01T00:00:00Z',
   })
   get createdAt() {
-    return this.dto.createdAt;
+    return this._dto.createdAt;
   }
 
   @ApiProperty({
@@ -45,10 +45,10 @@ export class CreateRoleRepositoryDto extends AbstractCreateRoleRepositoryDto {
     example: '2021-09-01T00:00:00Z',
   })
   get updatedAt() {
-    return this.dto.updatedAt;
+    return this._dto.updatedAt;
   }
 
-  constructor(private dto: ICreateRoleRepositoryDto) {
+  constructor(private _dto: ICreateRoleRepositoryDto) {
     super();
   }
 }

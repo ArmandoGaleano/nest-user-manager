@@ -24,6 +24,8 @@ import { RolesRepositoryService } from '@/infrastructure/persistence/repositorie
 import { RolesV1Controller } from '@/infrastructure/http/controllers/api/private/v1/roles.controller';
 import { AbstractCreateRoleUseCase } from '@/core/abstractions/use-cases/roles/create-role.use-case.abstract';
 import { CreateRoleUseCase } from '@/application/use-cases/roles/create-role-use-case';
+import { AbstractSearchUsersUseCase } from '@/core/abstractions/use-cases/users/search-users.use-case.abstract';
+import { SearchUsersUseCase } from '@/application/use-cases/users/search-users.use-case';
 
 @Module({
   imports: [UserHelperModule],
@@ -72,6 +74,10 @@ import { CreateRoleUseCase } from '@/application/use-cases/roles/create-role-use
     {
       provide: AbstractCreateRoleUseCase,
       useClass: CreateRoleUseCase,
+    },
+    {
+      provide: AbstractSearchUsersUseCase,
+      useClass: SearchUsersUseCase,
     },
   ],
   exports: [],

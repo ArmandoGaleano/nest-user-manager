@@ -1,6 +1,8 @@
+import { AbstractAutoSerializableClass } from '@/core/abstractions/base/auto-serializable-class.abstract';
 import { ICreateUserUseCaseDto } from '@/core/interfaces/dtos/use-cases/users/create-user-use-case.dto.interface';
 
 export abstract class AbstractCreateUserUseCaseDto
+  extends AbstractAutoSerializableClass<ICreateUserUseCaseDto>
   implements ICreateUserUseCaseDto
 {
   abstract email: ICreateUserUseCaseDto['email'];

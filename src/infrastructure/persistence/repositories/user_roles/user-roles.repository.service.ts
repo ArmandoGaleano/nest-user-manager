@@ -7,6 +7,7 @@ import { UserRolesModel } from '../../database-models/user_roles.model';
 import { AbstractUserRoleRepositoryDto } from '@/core/abstractions/dtos/repositories/user-roles/user-role-repository.dto.abstract';
 import { AbstractCreateUserRoleRepositoryDto } from '@/core/abstractions/dtos/repositories/user-roles/create-user-role.dto.abstract';
 import { InternalServerError } from '@/core/errors/InternalServerError.error';
+import { UserRoleRepositoryDto } from '@/core/dtos/repositories/user-roles/user-role-repository.dto';
 
 @Injectable()
 export class UserRolesRepositoryService extends AbstractUserRolesRepositoryService {
@@ -18,7 +19,6 @@ export class UserRolesRepositoryService extends AbstractUserRolesRepositoryServi
     dto: AbstractCreateUserRoleRepositoryDto,
   ): Promise<Either<InternalServerError, AbstractUserRoleRepositoryDto>> {
     try {
-      console.log({dto})
       const userRole = await knex<UserRolesModel>('user_roles')
         .insert({
           user_id: dto.user_id,
@@ -32,7 +32,7 @@ export class UserRolesRepositoryService extends AbstractUserRolesRepositoryServi
         throw new InternalServerError();
       }
 
-      return right(userRole[0]);
+      return right(new UserRoleRepositoryDto(userRole[0]));
     } catch (error) {
       console.error('UserRolesRepositoryService error: createUserRoles');
       console.error(error);

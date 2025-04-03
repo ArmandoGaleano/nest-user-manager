@@ -1,6 +1,8 @@
+import { AbstractAutoSerializableClass } from '@/core/abstractions/base/auto-serializable-class.abstract';
 import { IValidateCreateUserDto } from '@/core/interfaces/dtos/services/users/user-validation-service/validate-create-user.dto.interface';
 
 export abstract class AbstractValidateCreateUserDto
+  extends AbstractAutoSerializableClass<IValidateCreateUserDto>
   implements IValidateCreateUserDto
 {
   abstract readonly id: IValidateCreateUserDto['id'];

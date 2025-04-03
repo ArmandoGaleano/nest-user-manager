@@ -1,6 +1,8 @@
+import { AbstractAutoSerializableClass } from '@/core/abstractions/base/auto-serializable-class.abstract';
 import { IUpdateUserUseCaseDto } from '@/core/interfaces/dtos/use-cases/users/update-user-use-case.dto.interface';
 
 export abstract class AbstractUpdateUserUseCaseDto
+  extends AbstractAutoSerializableClass<IUpdateUserUseCaseDto>
   implements IUpdateUserUseCaseDto
 {
   abstract id: IUpdateUserUseCaseDto['id'];

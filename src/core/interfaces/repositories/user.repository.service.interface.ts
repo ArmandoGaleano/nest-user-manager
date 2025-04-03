@@ -7,6 +7,7 @@ import { AbstractDeleteUserRepositoryDto } from '@/core/abstractions/dtos/reposi
 import { AbstractSearchUsersRepositoryDto } from '@/core/abstractions/dtos/repositories/users/search-users-repository.dto.abstract';
 import { InternalServerError } from '@/core/errors/InternalServerError.error';
 import { CreateUserRepositoryError } from '@/core/errors/repository/users/CreateUserRepositoryError.error';
+import { AbstractSearchUsersRepositoryResultDto } from '@/core/abstractions/dtos/repositories/users/search-users-repository-result.dto.abstract';
 
 export interface IUsersRepositoryService {
   createUser(
@@ -31,5 +32,7 @@ export interface IUsersRepositoryService {
 
   searchUsers(
     dto: AbstractSearchUsersRepositoryDto,
-  ): Promise<Either<InternalServerError, AbstractUserRepositoryDto[]>>;
+  ): Promise<
+    Either<InternalServerError, AbstractSearchUsersRepositoryResultDto[]>
+  >;
 }

@@ -23,6 +23,9 @@ import { UpdateUserUseCaseDto } from '@/core/dtos/use-cases/users/update-user-us
 import { DeleteUserRepositoryDto } from '@/core/dtos/repositories/users/delete-user-repository.dto';
 
 import { UserAlreadyExistsError } from '@/core/errors/services/users/user-validation-service/UserAlreadyExistsError.error';
+import { AbstractSearchUsersUseCase } from '@/core/abstractions/use-cases/users/search-users.use-case.abstract';
+import { AbstractSearchUsersRepositoryDto } from '@/core/abstractions/dtos/repositories/users/search-users-repository.dto.abstract';
+import { UserRepositoryDto } from '@/core/dtos/repositories/users/user-repository.dto';
 @Controller('users')
 export class UsersV1Controller {
   constructor(
@@ -30,6 +33,7 @@ export class UsersV1Controller {
     private readUserUseCase: AbstractReadUserUseCase,
     private updateUserUseCase: AbstractUpdateUserUseCase,
     private deleteUserUseCase: AbstractDeleteUserUseCase,
+    private searchUsersUseCase: AbstractSearchUsersUseCase,
   ) {}
 
   @Post()
@@ -182,6 +186,44 @@ export class UsersV1Controller {
       return { message: 'User not found' };
     } catch {
       console.log('error');
+    }
+  }
+
+  @Get('search')
+  async searchUsers(
+    @Req() request: Request,
+    @Query() searchUsersDto: AbstractSearchUsersRepositoryDto,
+  ) {
+    try {
+      const eitherSearchUsersResult =
+        await this.searchUsersUseCase.execute(searchUsersDto);
+
+      if (eitherSearchUsersResult instanceof Left) {
+        if (eitherSearchUsersResult.value instanceof z.ZodError) {
+          request.res?.status(400);
+
+          return { messages: eitherSearchUsersResult.value.errors };
+        }
+
+        request.res?.status(500);
+        return { message: eitherSearchUsersResult.value.message };
+      }
+
+      if (!eitherSearchUsersResult.value) {
+        request.res?.status(404);
+        return { message: 'User not found' };
+      }
+
+      request.res?.status(200);
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+      return eitherSearchUsersResult.value.map((user) => user.toJSON());
+    } catch (error) {
+      console.error('Controller error: searchUsers');
+      console.error(error);
+
+      request.res?.status(500);
+      return { message: 'Internal server error' };
     }
   }
 }

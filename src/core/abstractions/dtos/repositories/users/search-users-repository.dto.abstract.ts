@@ -13,7 +13,11 @@ export abstract class AbstractSearchUsersRepositoryDto
   abstract document?: ISearchUsersRepositoryDto['document'];
   abstract documentType?: ISearchUsersRepositoryDto['documentType'];
   abstract createdAt?: ISearchUsersRepositoryDto['createdAt'];
+  abstract createdAtStart?: ISearchUsersRepositoryDto['createdAtStart'];
+  abstract createdAtEnd?: ISearchUsersRepositoryDto['createdAtEnd'];
   abstract updatedAt?: ISearchUsersRepositoryDto['updatedAt'];
+  abstract updatedAtStart?: ISearchUsersRepositoryDto['updatedAtStart'];
+  abstract updatedAtEnd?: ISearchUsersRepositoryDto['updatedAtEnd'];
   abstract roles?: ISearchUsersRepositoryDto['roles'];
   abstract page?: ISearchUsersRepositoryDto['page'];
   abstract limit?: ISearchUsersRepositoryDto['limit'];

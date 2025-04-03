@@ -9,10 +9,10 @@ export class DeleteRoleDto extends AbstractDeleteRoleRepositoryDto {
     example: '123456789',
   })
   get id() {
-    return this.dto.id;
+    return this._dto.id;
   }
 
-  constructor(private dto: IDeleteRoleRepositoryDto) {
+  constructor(private _dto: IDeleteRoleRepositoryDto) {
     super();
   }
 }

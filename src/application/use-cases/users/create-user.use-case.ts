@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { knex } from 'src/infrastructure/persistence/knex';
 
 import { AbstractCreateUserUseCase } from '../../../core/abstractions/use-cases/users/create-user.use-case.abstract';
 
@@ -18,11 +17,11 @@ import { CreateUserRoleDto } from '@/core/dtos/repositories/user-roles/create-us
 import { InternalServerError } from '@/core/errors/InternalServerError.error';
 import { UserAlreadyExistsError } from '@/core/errors/services/users/user-validation-service/UserAlreadyExistsError.error';
 import { AbstractCreateUserUseCaseDto } from '@/core/abstractions/dtos/use-cases/users/create-user-use-case.dto.abstract';
-import { UserRepositoryDto } from '@/core/dtos/repositories/users/user-repository.dto';
 import { UserEntity } from '@/domain/users/user.entity';
 import { AbstractUserEntity } from '@/core/abstractions/entities/user.abstract';
 import { RoleNotFoundError } from '@/core/errors/services/roles/roles-validation-service/RoleNotFoundError.error';
 import { CreateUserRepositoryDto } from '@/core/dtos/repositories/users/create-user-repository.dto';
+import { ValidateCreateUserDto } from '@/core/dtos/services/users/user-validation-service/validate-create-user.dto';
 
 @Injectable()
 export class CreateUserUseCase extends AbstractCreateUserUseCase {
@@ -54,12 +53,14 @@ export class CreateUserUseCase extends AbstractCreateUserUseCase {
       const updatedAt = this.SystemDateTimeHelperService.getDate();
 
       const eitherValidateCreateUser =
-        await this.UserValidationService.validateCreateUser({
-          ...dto,
-          id: userId,
-          createdAt,
-          updatedAt,
-        });
+        await this.UserValidationService.validateCreateUser(
+          new ValidateCreateUserDto({
+            ...dto,
+            id: userId,
+            createdAt,
+            updatedAt,
+          }),
+        );
 
       if (eitherValidateCreateUser instanceof Left) {
         return left(eitherValidateCreateUser.value);
@@ -112,7 +113,7 @@ export class CreateUserUseCase extends AbstractCreateUserUseCase {
 
       return right(
         new UserEntity({
-          ...eitherCreateUser.value,
+          ...eitherCreateUser.value.toObject(),
           roles: eitherValidateRolesExists.value,
         }),
       );

@@ -10,6 +10,7 @@ import { InternalServerError } from '@/core/errors/InternalServerError.error';
 import { UpdateUserRepositoryError } from '@/core/errors/repository/users/UpdateUserRepositoryError.error';
 import { AbstractUpdateUserUseCase } from '@/core/abstractions/use-cases/users/update-user.use-case.abstract';
 import { UserAlreadyExistsError } from '@/core/errors/services/users/user-validation-service/UserAlreadyExistsError.error';
+import { UpdateUserRepositoryDto } from '@/core/dtos/repositories/users/update-user-repository.dto';
 
 @Injectable()
 export class UpdateUserUseCase extends AbstractUpdateUserUseCase {
@@ -34,10 +35,12 @@ export class UpdateUserUseCase extends AbstractUpdateUserUseCase {
   > {
     try {
       const eitherValidateUpdateUserSchema =
-        await this.UserValidationService.validateUpdateUser({
-          ...dto,
-          updatedAt: this.SystemDateTimeHelperService.getDate(),
-        });
+        await this.UserValidationService.validateUpdateUser(
+          new UpdateUserRepositoryDto({
+            ...dto,
+            updatedAt: this.SystemDateTimeHelperService.getDate(),
+          }),
+        );
 
       if (eitherValidateUpdateUserSchema instanceof Left) {
         return left(eitherValidateUpdateUserSchema.value);
@@ -45,8 +48,9 @@ export class UpdateUserUseCase extends AbstractUpdateUserUseCase {
 
       const validateDto = eitherValidateUpdateUserSchema.value;
 
-      const eitherUpdateUser =
-        await this.UsersRepositoryService.updateUser(validateDto);
+      const eitherUpdateUser = await this.UsersRepositoryService.updateUser(
+        new UpdateUserRepositoryDto(validateDto),
+      );
 
       if (eitherUpdateUser instanceof Left) {
         return left(eitherUpdateUser.value);

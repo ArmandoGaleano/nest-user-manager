@@ -9,7 +9,6 @@ import { Either, Left, left, right } from '@/shared/either';
 import { createUserDtoZodSchema } from './schema/create-user-dto-schema';
 import { readUserDtoZodSchema } from './schema/read-user-dto-schema';
 
-import { AbstractCreateUserRepositoryDto } from '@/core/abstractions/dtos/repositories/users/create-user-repository.dto.abstract';
 import { AbstractUserRepositoryDto } from '@/core/abstractions/dtos/repositories/users/user-repository.dto.abstract';
 import { AbstractReadUserRepositoryDto } from '@/core/abstractions/dtos/repositories/users/read-user-repository.dto.abstract';
 import { AbstractUpdateUserRepositoryDto } from '@/core/abstractions/dtos/repositories/users/update-user-repository.dto.abstract';
@@ -19,6 +18,14 @@ import { InternalServerError } from '@/core/errors/InternalServerError.error';
 import { UserAlreadyExistsError } from '../../../../core/errors/services/users/user-validation-service/UserAlreadyExistsError.error';
 import { AbstractValidateCreateUserDto } from '@/core/abstractions/dtos/services/users/user-validation-service/validate-create-user.dto.interface';
 import { updateUserDtoZodSchema } from './schema/update-user-dto-schema';
+import { SearchUsersRepositoryDto } from '@/core/dtos/repositories/users/search-users-repository.dto';
+import { AbstractSearchUsersRepositoryDto } from '@/core/abstractions/dtos/repositories/users/search-users-repository.dto.abstract';
+import { searchUsersDtoZodSchema } from './schema/search-users-dto-schema';
+import { IValidateCreateUserDto } from '@/core/interfaces/dtos/services/users/user-validation-service/validate-create-user.dto.interface';
+import { IReadUserRepositoryDto } from '@/core/interfaces/dtos/repositories/users/read-user-repository.dto.interface';
+import { IUpdateUserRepositoryDto } from '@/core/interfaces/dtos/repositories/users/update-user-repository.dto.interface';
+import { IDeleteUserRepositoryDto } from '@/core/interfaces/dtos/repositories/users/delete-user-repository.dto.interface';
+import { ISearchUsersRepositoryDto } from '@/core/interfaces/dtos/repositories/users/search-users-repository.dto.interface';
 
 @Injectable()
 export class UserValidationService extends AbstractUserValidationService {
@@ -79,10 +86,10 @@ export class UserValidationService extends AbstractUserValidationService {
         [x: string]: any;
       }>
     | InternalServerError,
-    AbstractValidateCreateUserDto
+    IValidateCreateUserDto
   > {
-    return this.validateDtoSchema<AbstractValidateCreateUserDto>({
-      currentMethodName: 'validateCreateUser',
+    return this.validateDtoSchema<IValidateCreateUserDto>({
+      currentMethodName: 'validateCreateUserSchema',
       zodSchema: createUserDtoZodSchema,
       dto,
     });
@@ -93,10 +100,10 @@ export class UserValidationService extends AbstractUserValidationService {
         [x: string]: any;
       }>
     | InternalServerError,
-    AbstractReadUserRepositoryDto
+    IReadUserRepositoryDto
   > {
-    return this.validateDtoSchema<AbstractReadUserRepositoryDto>({
-      currentMethodName: 'validateReadUser',
+    return this.validateDtoSchema<IReadUserRepositoryDto>({
+      currentMethodName: 'validateReadUserSchema',
       zodSchema: readUserDtoZodSchema,
       dto,
     });
@@ -107,10 +114,10 @@ export class UserValidationService extends AbstractUserValidationService {
         [x: string]: any;
       }>
     | InternalServerError,
-    AbstractUpdateUserRepositoryDto
+    IUpdateUserRepositoryDto
   > {
-    return this.validateDtoSchema<AbstractUpdateUserRepositoryDto>({
-      currentMethodName: 'validateUpdateUser',
+    return this.validateDtoSchema<IUpdateUserRepositoryDto>({
+      currentMethodName: 'validateUpdateUserSchema',
       zodSchema: updateUserDtoZodSchema,
       dto,
     });
@@ -121,11 +128,27 @@ export class UserValidationService extends AbstractUserValidationService {
         [x: string]: any;
       }>
     | InternalServerError,
-    AbstractDeleteUserRepositoryDto
+    IDeleteUserRepositoryDto
   > {
-    return this.validateDtoSchema<AbstractDeleteUserRepositoryDto>({
-      currentMethodName: 'validateDeleteUser',
+    return this.validateDtoSchema<IDeleteUserRepositoryDto>({
+      currentMethodName: 'validateDeleteUserSchema',
       zodSchema: readUserDtoZodSchema,
+      dto,
+    });
+  }
+
+  public validateSearchUsersSchema(
+    dto: AbstractSearchUsersRepositoryDto,
+  ): Either<
+    | z.ZodError<{
+        [x: string]: any;
+      }>
+    | InternalServerError,
+    ISearchUsersRepositoryDto
+  > {
+    return this.validateDtoSchema<ISearchUsersRepositoryDto>({
+      currentMethodName: 'validateSearchUsersSchema',
+      zodSchema: searchUsersDtoZodSchema,
       dto,
     });
   }
@@ -137,7 +160,7 @@ export class UserValidationService extends AbstractUserValidationService {
         }>
       | InternalServerError
       | UserAlreadyExistsError,
-      AbstractValidateCreateUserDto
+      IValidateCreateUserDto
     >
   > {
     const validator = this.validateCreateUserSchema(dto);
@@ -173,7 +196,7 @@ export class UserValidationService extends AbstractUserValidationService {
         }>
       | InternalServerError
       | UserAlreadyExistsError,
-      AbstractUpdateUserRepositoryDto
+      IUpdateUserRepositoryDto
     >
   > {
     const validator = this.validateUpdateUserSchema(dto);
@@ -211,11 +234,19 @@ export class UserValidationService extends AbstractUserValidationService {
   >): Promise<Either<InternalServerError, boolean>> {
     try {
       const eitherListSearchByExistentAccount = await Promise.all([
-        id ? this.UserRepositoryService.searchUsers({ id }) : { value: [] },
-        email
-          ? this.UserRepositoryService.searchUsers({ email })
+        id
+          ? this.UserRepositoryService.searchUsers(
+              new SearchUsersRepositoryDto({ id }),
+            )
           : { value: [] },
-        this.UserRepositoryService.searchUsers({ document, documentType }),
+        email
+          ? this.UserRepositoryService.searchUsers(
+              new SearchUsersRepositoryDto({ email }),
+            )
+          : { value: [] },
+        this.UserRepositoryService.searchUsers(
+          new SearchUsersRepositoryDto({ document, documentType }),
+        ),
       ]);
 
       const error = eitherListSearchByExistentAccount.find(

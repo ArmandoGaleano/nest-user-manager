@@ -9,7 +9,7 @@ export class SearchUsersRepositoryDto extends AbstractSearchUsersRepositoryDto {
     example: '123456789',
   })
   get id() {
-    return this.dto.id;
+    return this._dto.id;
   }
 
   @ApiProperty({
@@ -19,7 +19,7 @@ export class SearchUsersRepositoryDto extends AbstractSearchUsersRepositoryDto {
     example: 'example@email.com',
   })
   get email() {
-    return this.dto.email;
+    return this._dto.email;
   }
 
   @ApiProperty({
@@ -28,7 +28,7 @@ export class SearchUsersRepositoryDto extends AbstractSearchUsersRepositoryDto {
     example: 'Mr.',
   })
   get firstName() {
-    return this.dto.firstName;
+    return this._dto.firstName;
   }
 
   @ApiProperty({
@@ -37,7 +37,7 @@ export class SearchUsersRepositoryDto extends AbstractSearchUsersRepositoryDto {
     example: 'Robot',
   })
   get lastName() {
-    return this.dto.lastName;
+    return this._dto.lastName;
   }
 
   @ApiProperty({
@@ -47,7 +47,7 @@ export class SearchUsersRepositoryDto extends AbstractSearchUsersRepositoryDto {
     example: '2000-01-01',
   })
   get birthdate() {
-    return this.dto.birthdate;
+    return this._dto.birthdate;
   }
 
   @ApiProperty({
@@ -57,7 +57,7 @@ export class SearchUsersRepositoryDto extends AbstractSearchUsersRepositoryDto {
     example: 'customer',
   })
   get document() {
-    return this.dto.document;
+    return this._dto.document;
   }
 
   @ApiProperty({
@@ -67,7 +67,7 @@ export class SearchUsersRepositoryDto extends AbstractSearchUsersRepositoryDto {
     example: 'CPF',
   })
   get documentType() {
-    return this.dto.documentType;
+    return this._dto.documentType;
   }
 
   @ApiProperty({
@@ -77,7 +77,27 @@ export class SearchUsersRepositoryDto extends AbstractSearchUsersRepositoryDto {
     example: '2021-12-31T23:59:59',
   })
   get createdAt() {
-    return this.dto.createdAt;
+    return this._dto.createdAt;
+  }
+
+  @ApiProperty({
+    type: 'string',
+    format: 'date-time',
+    description: 'User created at start',
+    example: '2021-12-31T23:59:59',
+  })
+  get createdAtStart() {
+    return this._dto.createdAtStart;
+  }
+
+  @ApiProperty({
+    type: 'string',
+    format: 'date-time',
+    description: 'User created at end',
+    example: '2021-12-31T23:59:59',
+  })
+  get createdAtEnd() {
+    return this._dto.createdAtEnd;
   }
 
   @ApiProperty({
@@ -87,7 +107,27 @@ export class SearchUsersRepositoryDto extends AbstractSearchUsersRepositoryDto {
     example: '2021-12-31T23:59:59',
   })
   get updatedAt() {
-    return this.dto.updatedAt;
+    return this._dto.updatedAt;
+  }
+
+  @ApiProperty({
+    type: 'string',
+    format: 'date-time',
+    description: 'User updated at start',
+    example: '2021-12-31T23:59:59',
+  })
+  get updatedAtStart() {
+    return this._dto.updatedAtStart;
+  }
+
+  @ApiProperty({
+    type: 'string',
+    format: 'date-time',
+    description: 'User updated at end',
+    example: '2021-12-31T23:59:59',
+  })
+  get updatedAtEnd() {
+    return this._dto.updatedAtEnd;
   }
 
   @ApiProperty({
@@ -100,7 +140,7 @@ export class SearchUsersRepositoryDto extends AbstractSearchUsersRepositoryDto {
     example: ['customer'],
   })
   get roles() {
-    return this.dto.roles;
+    return this._dto.roles;
   }
 
   @ApiProperty({
@@ -109,14 +149,14 @@ export class SearchUsersRepositoryDto extends AbstractSearchUsersRepositoryDto {
     example: 1,
   })
   get page() {
-    return this.dto.page;
+    return this._dto.page;
   }
 
   get limit() {
-    return this.dto.limit;
+    return this._dto.limit;
   }
 
-  constructor(private dto: ISearchUsersRepositoryDto) {
+  constructor(private _dto: ISearchUsersRepositoryDto) {
     super();
   }
 }

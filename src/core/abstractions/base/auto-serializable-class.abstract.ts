@@ -5,33 +5,23 @@
 /* eslint-disable no-prototype-builtins */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 export abstract class AbstractAutoSerializableClass<TPublicClassData = any> {
-  protected excludedFields: string[] = ['dto'];
-
-  constructor() {
-    // Torna a propriedade 'excludedFields' não enumerável
-    Object.defineProperty(this, 'excludedFields', {
-      enumerable: false,
-      configurable: false,
-      writable: false,
-      value: this.excludedFields,
-    });
-  }
+  constructor() {}
 
   toObject(): TPublicClassData {
     const result: Record<string, any> = {};
 
-    // Propriedades públicas da instância
-    Object.keys(this)
-      .filter((key) => !this.excludedFields.includes(key))
-      .forEach((key) => {
-        result[key] = this.serializeValue(this[key]);
-      });
+    // Serializa apenas as propriedades que não começam com '_'
+    Object.keys(this).forEach((key) => {
+      if (key.startsWith('_')) return; // ignora propriedades privadas
+      result[key] = this.serializeValue(this[key]);
+    });
 
-    // Propriedades definidas via getters no protótipo
+    // Serializa propriedades definidas via getters no protótipo, ignorando as privadas
     const prototype = Object.getPrototypeOf(this);
     Object.getOwnPropertyNames(prototype).forEach((key) => {
-      if (key === 'constructor' || this.excludedFields.includes(key)) return;
+      if (key === 'constructor') return;
       if (result.hasOwnProperty(key)) return;
+      if (key.startsWith('_')) return; // ignora getters que representem propriedades privadas
 
       const descriptor = Object.getOwnPropertyDescriptor(prototype, key);
       if (descriptor && typeof descriptor.get === 'function') {

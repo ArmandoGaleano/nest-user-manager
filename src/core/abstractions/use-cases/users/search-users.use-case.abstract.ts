@@ -4,13 +4,21 @@ import { ISearchUsersUseCase } from '@/core/interfaces/use-cases/users/search-us
 import { AbstractSearchUsersRepositoryDto } from '../../dtos/repositories/users/search-users-repository.dto.abstract';
 
 import { Either } from '@/shared/either';
-import { AbstractUserRepositoryDto } from '../../dtos/repositories/users/user-repository.dto.abstract';
+import { InternalServerError } from '@/core/errors/InternalServerError.error';
+import { z } from 'zod';
+import { AbstractSearchUsersRepositoryResultDto } from '../../dtos/repositories/users/search-users-repository-result.dto.abstract';
 
 export abstract class AbstractSearchUsersUseCase
   extends AbstractUseCase
   implements ISearchUsersUseCase
 {
-  abstract execute: (
-    dto: AbstractSearchUsersRepositoryDto,
-  ) => Promise<Either<Error, AbstractUserRepositoryDto[]>>;
+  abstract execute(dto: AbstractSearchUsersRepositoryDto): Promise<
+    Either<
+      | z.ZodError<{
+          [x: string]: any;
+        }>
+      | InternalServerError,
+      AbstractSearchUsersRepositoryResultDto[]
+    >
+  >;
 }

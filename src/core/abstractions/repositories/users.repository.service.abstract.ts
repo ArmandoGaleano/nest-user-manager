@@ -9,6 +9,7 @@ import { AbstractSearchUsersRepositoryDto } from '../dtos/repositories/users/sea
 import { InternalServerError } from '@/core/errors/InternalServerError.error';
 import { CreateUserRepositoryError } from '@/core/errors/repository/users/CreateUserRepositoryError.error';
 import { UpdateUserRepositoryError } from '@/core/errors/repository/users/UpdateUserRepositoryError.error';
+import { AbstractSearchUsersRepositoryResultDto } from '../dtos/repositories/users/search-users-repository-result.dto.abstract';
 
 export abstract class AbstractUsersRepositoryService
   implements IUsersRepositoryService
@@ -40,5 +41,7 @@ export abstract class AbstractUsersRepositoryService
 
   abstract searchUsers(
     dto: AbstractSearchUsersRepositoryDto,
-  ): Promise<Either<InternalServerError, AbstractUserRepositoryDto[]>>;
+  ): Promise<
+    Either<InternalServerError, AbstractSearchUsersRepositoryResultDto[]>
+  >;
 }

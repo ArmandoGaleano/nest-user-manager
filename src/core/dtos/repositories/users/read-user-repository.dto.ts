@@ -9,7 +9,7 @@ export class ReadUserRepositoryDto extends AbstractReadUserRepositoryDto {
     example: 'ab4qf871454$f#%',
   })
   get id() {
-    return this.dto.id;
+    return this._dto.id;
   }
 
   @ApiProperty({
@@ -19,10 +19,10 @@ export class ReadUserRepositoryDto extends AbstractReadUserRepositoryDto {
     example: 'example@email.com',
   })
   get email() {
-    return this.dto.email;
+    return this._dto.email;
   }
 
-  constructor(private dto: IReadUserRepositoryDto) {
+  constructor(private _dto: IReadUserRepositoryDto) {
     super();
   }
 }

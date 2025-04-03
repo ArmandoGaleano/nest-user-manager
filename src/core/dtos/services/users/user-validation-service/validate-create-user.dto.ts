@@ -9,7 +9,7 @@ export class ValidateCreateUserDto extends AbstractValidateCreateUserDto {
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
   get id(): string {
-    return this.props.id;
+    return this._props.id;
   }
 
   @ApiProperty({
@@ -18,7 +18,7 @@ export class ValidateCreateUserDto extends AbstractValidateCreateUserDto {
     example: 'teste@teste.com',
   })
   get email(): string {
-    return this.props.email;
+    return this._props.email;
   }
 
   @ApiProperty({
@@ -27,7 +27,7 @@ export class ValidateCreateUserDto extends AbstractValidateCreateUserDto {
     example: '123456',
   })
   get password(): string {
-    return this.props.password;
+    return this._props.password;
   }
 
   @ApiProperty({
@@ -36,7 +36,7 @@ export class ValidateCreateUserDto extends AbstractValidateCreateUserDto {
     example: 'John',
   })
   get firstName(): IValidateCreateUserDto['firstName'] {
-    return this.props.firstName;
+    return this._props.firstName;
   }
 
   @ApiProperty({
@@ -45,7 +45,7 @@ export class ValidateCreateUserDto extends AbstractValidateCreateUserDto {
     example: 'Doe',
   })
   get lastName(): IValidateCreateUserDto['lastName'] {
-    return this.props.lastName;
+    return this._props.lastName;
   }
 
   @ApiProperty({
@@ -54,7 +54,7 @@ export class ValidateCreateUserDto extends AbstractValidateCreateUserDto {
     example: '1990-01-01',
   })
   get birthdate(): IValidateCreateUserDto['birthdate'] {
-    return this.props.birthdate;
+    return this._props.birthdate;
   }
 
   @ApiProperty({
@@ -63,7 +63,7 @@ export class ValidateCreateUserDto extends AbstractValidateCreateUserDto {
     example: '12345678901',
   })
   get document(): IValidateCreateUserDto['document'] {
-    return this.props.document;
+    return this._props.document;
   }
 
   @ApiProperty({
@@ -72,7 +72,7 @@ export class ValidateCreateUserDto extends AbstractValidateCreateUserDto {
     example: 'CPF',
   })
   get documentType(): IValidateCreateUserDto['documentType'] {
-    return this.props.documentType;
+    return this._props.documentType;
   }
 
   @ApiProperty({
@@ -81,7 +81,7 @@ export class ValidateCreateUserDto extends AbstractValidateCreateUserDto {
     example: ['admin'],
   })
   get roles(): IValidateCreateUserDto['roles'] {
-    return this.props.roles;
+    return this._props.roles;
   }
 
   @ApiProperty({
@@ -90,7 +90,7 @@ export class ValidateCreateUserDto extends AbstractValidateCreateUserDto {
     example: '2022-01-01T00:00:00.000Z',
   })
   get createdAt(): IValidateCreateUserDto['createdAt'] {
-    return this.props.createdAt;
+    return this._props.createdAt;
   }
 
   @ApiProperty({
@@ -99,10 +99,10 @@ export class ValidateCreateUserDto extends AbstractValidateCreateUserDto {
     example: '2022-01-01T00:00:00.000Z',
   })
   get updatedAt(): IValidateCreateUserDto['updatedAt'] {
-    return this.props.updatedAt;
+    return this._props.updatedAt;
   }
 
-  constructor(private props: IValidateCreateUserDto) {
+  constructor(private _props: IValidateCreateUserDto) {
     super();
   }
 }

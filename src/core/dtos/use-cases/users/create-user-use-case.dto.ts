@@ -10,7 +10,7 @@ export class CreateUserUseCaseDto extends AbstractCreateUserUseCaseDto {
     example: 'teste@teste.com',
   })
   get email() {
-    return this.dto.email;
+    return this._dto.email;
   }
 
   @ApiProperty({
@@ -19,7 +19,7 @@ export class CreateUserUseCaseDto extends AbstractCreateUserUseCaseDto {
     example: 'password',
   })
   get password() {
-    return this.dto.password;
+    return this._dto.password;
   }
 
   @ApiProperty({
@@ -28,7 +28,7 @@ export class CreateUserUseCaseDto extends AbstractCreateUserUseCaseDto {
     example: 'John',
   })
   get firstName() {
-    return this.dto.firstName;
+    return this._dto.firstName;
   }
 
   @ApiProperty({
@@ -37,7 +37,7 @@ export class CreateUserUseCaseDto extends AbstractCreateUserUseCaseDto {
     example: 'Doe',
   })
   get lastName() {
-    return this.dto.lastName;
+    return this._dto.lastName;
   }
 
   @ApiProperty({
@@ -47,7 +47,7 @@ export class CreateUserUseCaseDto extends AbstractCreateUserUseCaseDto {
     example: '2000-01-01',
   })
   get birthdate() {
-    return this.dto.birthdate;
+    return this._dto.birthdate;
   }
 
   @ApiProperty({
@@ -56,7 +56,7 @@ export class CreateUserUseCaseDto extends AbstractCreateUserUseCaseDto {
     example: '123456789',
   })
   get document() {
-    return this.dto.document;
+    return this._dto.document;
   }
 
   @ApiProperty({
@@ -66,7 +66,7 @@ export class CreateUserUseCaseDto extends AbstractCreateUserUseCaseDto {
     example: 'CPF',
   })
   get documentType() {
-    return this.dto.documentType;
+    return this._dto.documentType;
   }
 
   @ApiProperty({
@@ -78,10 +78,10 @@ export class CreateUserUseCaseDto extends AbstractCreateUserUseCaseDto {
     example: ['role1', 'role2'],
   })
   get roles() {
-    return this.dto.roles;
+    return this._dto.roles;
   }
 
-  constructor(private dto: ICreateUserUseCaseDto) {
+  constructor(private _dto: ICreateUserUseCaseDto) {
     super();
   }
 }

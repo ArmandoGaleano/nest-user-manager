@@ -13,6 +13,7 @@ import { InternalServerError } from '@/core/errors/InternalServerError.error';
 import { RoleNotFoundError } from '@/core/errors/services/roles/roles-validation-service/RoleNotFoundError.error';
 import { AbstractRoleRepositoryDto } from '@/core/abstractions/dtos/repositories/roles/role-repository.dto.abstract';
 import { Injectable } from '@nestjs/common';
+import { SearchRolesRepositoryDto } from '@/core/dtos/repositories/roles/search-roles-repository.dto';
 
 @Injectable()
 export class RolesValidationService extends AbstractRolesValidationService {
@@ -119,9 +120,11 @@ export class RolesValidationService extends AbstractRolesValidationService {
       const rolesPromise = await Promise.all(
         roles.map(async (role) => {
           const eitherSearchRolesResult =
-            await this.RolesRepositoryService.searchRoles({
-              name: role,
-            });
+            await this.RolesRepositoryService.searchRoles(
+              new SearchRolesRepositoryDto({
+                name: role,
+              }),
+            );
 
           if (eitherSearchRolesResult instanceof Left) {
             throw eitherSearchRolesResult.value;

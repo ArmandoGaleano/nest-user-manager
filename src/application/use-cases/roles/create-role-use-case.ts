@@ -12,6 +12,7 @@ import { z } from 'zod';
 import { RoleAlreadyExistError } from '@/core/errors/services/roles/roles-validation-service/RoleAlreadyExistError.error';
 import { AbstractCreateRoleUseCaseDto } from '@/core/abstractions/dtos/use-cases/roles/create-role-use-case.dto.abstract';
 import { AbstractSystemDateTimeHelperService } from '@/core/abstractions/helpers/system-date-time-helper.abstract';
+import { CreateRoleRepositoryDto } from '@/core/dtos/repositories/roles/create-role-repository.dto';
 
 @Injectable()
 export class CreateRoleUseCase extends AbstractCreateRoleUseCase {
@@ -36,12 +37,14 @@ export class CreateRoleUseCase extends AbstractCreateRoleUseCase {
   > {
     try {
       const eitherValidateRoleDto =
-        await this.RolesValidationService.validateCreateRole({
-          ...dto,
-          id: this.CryptoHelperService.generateUUID(),
-          createdAt: this.SystemDateTimeHelperService.getDate(),
-          updatedAt: this.SystemDateTimeHelperService.getDate(),
-        });
+        await this.RolesValidationService.validateCreateRole(
+          new CreateRoleRepositoryDto({
+            ...dto,
+            id: this.CryptoHelperService.generateUUID(),
+            createdAt: this.SystemDateTimeHelperService.getDate(),
+            updatedAt: this.SystemDateTimeHelperService.getDate(),
+          }),
+        );
 
       if (eitherValidateRoleDto instanceof Left) {
         return left(eitherValidateRoleDto.value);

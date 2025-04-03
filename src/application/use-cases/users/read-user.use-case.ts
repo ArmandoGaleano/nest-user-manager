@@ -7,6 +7,7 @@ import { AbstractUserValidationService } from '@/core/abstractions/services/user
 import { InternalServerError } from '@/core/errors/InternalServerError.error';
 import { z } from 'zod';
 import { AbstractReadUserUseCase } from '@/core/abstractions/use-cases/users/read-user.use-case.abstract';
+import { ReadUserRepositoryDto } from '@/core/dtos/repositories/users/read-user-repository.dto';
 
 @Injectable()
 export class ReadUserUseCase extends AbstractReadUserUseCase {
@@ -36,8 +37,9 @@ export class ReadUserUseCase extends AbstractReadUserUseCase {
 
       const validatedReadUserDto = eitherValidateReadUserSchema.value;
 
-      const eitherReadUser =
-        await this.UsersRepositoryService.readUser(validatedReadUserDto);
+      const eitherReadUser = await this.UsersRepositoryService.readUser(
+        new ReadUserRepositoryDto(validatedReadUserDto),
+      );
 
       if (eitherReadUser instanceof Left) {
         return eitherReadUser;
@@ -45,7 +47,7 @@ export class ReadUserUseCase extends AbstractReadUserUseCase {
 
       const readUser = eitherReadUser.value;
 
-      return right(readUser);
+      return right(readUser?.toObject());
     } catch (error) {
       console.error('Error on ReadUserUseCase');
       console.error(error);

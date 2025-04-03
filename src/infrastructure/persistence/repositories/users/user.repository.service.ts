@@ -13,6 +13,8 @@ import { InternalServerError } from '@/core/errors/InternalServerError.error';
 import { CreateUserRepositoryError } from '@/core/errors/repository/users/CreateUserRepositoryError.error';
 import { UpdateUserRepositoryError } from '@/core/errors/repository/users/UpdateUserRepositoryError.error';
 import { UserRepositoryDto } from '@/core/dtos/repositories/users/user-repository.dto';
+import { AbstractSearchUsersRepositoryResultDto } from '@/core/abstractions/dtos/repositories/users/search-users-repository-result.dto.abstract';
+import { SearchUsersRepositoryResultDto } from '@/core/dtos/repositories/users/search-users-repository-result.dto';
 
 @Injectable()
 export class UsersRepositoryService extends AbstractUsersRepositoryService {
@@ -141,7 +143,9 @@ export class UsersRepositoryService extends AbstractUsersRepositoryService {
 
   public async searchUsers(
     dto: AbstractSearchUsersRepositoryDto,
-  ): Promise<Either<InternalServerError, AbstractUserRepositoryDto[]>> {
+  ): Promise<
+    Either<InternalServerError, AbstractSearchUsersRepositoryResultDto[]>
+  > {
     try {
       const limit = dto.limit ? Math.min(dto.limit, 100) : 10;
       const page = dto.page && dto.page > 0 ? dto.page : 1;
@@ -166,17 +170,17 @@ export class UsersRepositoryService extends AbstractUsersRepositoryService {
       if (dto.email) {
         query.where('users.email', dto.email);
       }
+
       if (dto.firstName) {
-        query.whereRaw('users.firstName ILIKE ?', [
+        query.whereRaw('"users"."firstName" ILIKE ?', [
           `%${dto.firstName.replace(/[%_]/g, '\\$&')}%`,
         ]);
       }
       if (dto.lastName) {
-        query.whereRaw('users.lastName ILIKE ?', [
+        query.whereRaw('"users"."lastName" ILIKE ?', [
           `%${dto.lastName.replace(/[%_]/g, '\\$&')}%`,
         ]);
       }
-      // Se for fornecida uma data de nascimento, converte ambas as datas para comparar corretamente
       if (dto.birthdate) {
         query.whereRaw(
           `TO_DATE(users.birthdate, 'DD/MM/YYYY') = TO_DATE(?, 'DD/MM/YYYY')`,
@@ -192,30 +196,46 @@ export class UsersRepositoryService extends AbstractUsersRepositoryService {
       if (dto.createdAt) {
         query.where('users.createdAt', dto.createdAt);
       }
+      if (dto.createdAtStart) {
+        query.where('users.createdAt', '>=', dto.createdAtStart);
+      }
+      if (dto.createdAtEnd) {
+        query.where('users.createdAt', '<=', dto.createdAtEnd);
+      }
       if (dto.updatedAt) {
         query.where('users.updatedAt', dto.updatedAt);
       }
-      // Filtro por roles
-      if (dto.roles && dto.roles.length > 0) {
-        // Subquery para obter os IDs das roles com base nos nomes informados
+      if (dto.updatedAtStart) {
+        query.where('users.updatedAt', '>=', dto.updatedAtStart);
+      }
+      if (dto.updatedAtEnd) {
+        query.where('users.updatedAt', '<=', dto.updatedAtEnd);
+      }
+      // Filtro por roles, se informado
+      if (dto.roles && Array.isArray(dto.roles) && dto.roles.length > 0) {
         const rolesSubquery = knex('roles')
           .select('id')
           .whereIn('name', dto.roles);
-
-        // Subquery para obter os user_id na tabela de user_roles com os role_id obtidos na subquery anterior
         const userRolesSubquery = knex('user_roles')
           .select('user_id')
           .whereIn('role_id', rolesSubquery);
-
-        // Filtra os usuários que possuem associações na subquery
         query.whereIn('users.id', userRolesSubquery);
       }
 
+      // Ordenação por data de criação, do mais recente para o mais antigo
+      query.orderBy('users.createdAt', 'desc');
+
+      // Aplica paginação
       query.limit(limit).offset(offset);
 
-      const users = await query;
-      const result = ((users as UsersModel[]) ?? []).map(
-        (user) => new UserRepositoryDto(user),
+      const users = ((await query) as Omit<UsersModel, 'password'>[]) ?? [];
+      const result = users.map(
+        (user) =>
+          new SearchUsersRepositoryResultDto({
+            ...user,
+            page,
+            limit,
+          }),
       );
 
       return right(result);

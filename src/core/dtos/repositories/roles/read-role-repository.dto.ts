@@ -3,14 +3,14 @@ import { IRepositoryRoleDto } from '@/core/interfaces/dtos/repositories/roles/re
 
 export class ReadRoleRepositoryDto extends AbstractReadRoleRepositoryDto {
   get id() {
-    return this.dto.id;
+    return this._dto.id;
   }
 
   get name() {
-    return this.dto.name;
+    return this._dto.name;
   }
 
-  constructor(private dto: IRepositoryRoleDto) {
+  constructor(private _dto: IRepositoryRoleDto) {
     super();
   }
 }

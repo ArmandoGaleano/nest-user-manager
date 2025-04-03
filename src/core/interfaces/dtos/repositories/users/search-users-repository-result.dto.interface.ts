@@ -1,4 +1,4 @@
-export type ISearchUsersRepositoryDto = Optional<
+export type ISearchUsersRepositoryResultDto = Optional<
   Pick<
     UsersModel,
     | 'id'
@@ -11,13 +11,8 @@ export type ISearchUsersRepositoryDto = Optional<
     | 'createdAt'
     | 'updatedAt'
   > & {
-    roles: RolesModel['name'][];
     page: number;
     limit: number;
-    createdAtStart: UsersModel['createdAt'];
-    createdAtEnd: UsersModel['createdAt'];
-    updatedAtStart: UsersModel['updatedAt'];
-    updatedAtEnd: UsersModel['updatedAt'];
   },
   | 'id'
   | 'email'
@@ -27,12 +22,7 @@ export type ISearchUsersRepositoryDto = Optional<
   | 'document'
   | 'documentType'
   | 'createdAt'
-  | 'createdAtStart'
-  | 'createdAtEnd'
   | 'updatedAt'
-  | 'updatedAtStart'
-  | 'updatedAtEnd'
-  | 'roles'
   | 'page'
   | 'limit'
 >;
