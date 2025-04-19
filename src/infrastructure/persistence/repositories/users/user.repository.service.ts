@@ -1,20 +1,22 @@
 import { Injectable } from '@nestjs/common';
-import { AbstractUsersRepositoryService } from '@/core/abstractions/repositories/users.repository.service.abstract';
+
 import { Either, left, right } from '@/shared/either';
 
-import { AbstractUserRepositoryDto } from '@/core/abstractions/dtos/repositories/users/user-repository.dto.abstract';
-import { AbstractCreateUserRepositoryDto } from '@/core/abstractions/dtos/repositories/users/create-user-repository.dto.abstract';
-import { AbstractReadUserRepositoryDto } from '@/core/abstractions/dtos/repositories/users/read-user-repository.dto.abstract';
-import { AbstractUpdateUserRepositoryDto } from '@/core/abstractions/dtos/repositories/users/update-user-repository.dto.abstract';
-import { AbstractDeleteUserRepositoryDto } from '@/core/abstractions/dtos/repositories/users/delete-user-repository.dto.abstract';
-import { AbstractSearchUsersRepositoryDto } from '@/core/abstractions/dtos/repositories/users/search-users-repository.dto.abstract';
 import { knex } from '@/infrastructure/persistence/knex';
 import { InternalServerError } from '@/core/errors/InternalServerError.error';
-import { CreateUserRepositoryError } from '@/core/errors/repository/users/CreateUserRepositoryError.error';
-import { UpdateUserRepositoryError } from '@/core/errors/repository/users/UpdateUserRepositoryError.error';
-import { UserRepositoryDto } from '@/core/dtos/repositories/users/user-repository.dto';
-import { AbstractSearchUsersRepositoryResultDto } from '@/core/abstractions/dtos/repositories/users/search-users-repository-result.dto.abstract';
-import { SearchUsersRepositoryResultDto } from '@/core/dtos/repositories/users/search-users-repository-result.dto';
+import { CreateUserRepositoryError } from '@/core/errors/repositories/users/CreateUserRepositoryError.error';
+import { UpdateUserRepositoryError } from '@/core/errors/repositories/users/UpdateUserRepositoryError.error';
+import { UserRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/user-repository.dto';
+
+import { SearchUsersRepositoryResultDto } from '@/infrastructure/dtos/persistence/repositories/users/search-users-repository-result.dto';
+import { AbstractUsersRepositoryService } from '@/core/abstractions/infrastructure/repositories/users.repository.service.abstract';
+import { AbstractCreateUserRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/create-user-repository.dto.abstract';
+import { AbstractUserRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/user-repository.dto.abstract';
+import { AbstractReadUserRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/read-user-repository.dto.abstract';
+import { AbstractUpdateUserRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/update-user-repository.dto.abstract';
+import { AbstractDeleteUserRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/delete-user-repository.dto.abstract';
+import { AbstractSearchUsersRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/search-users-repository.dto.abstract';
+import { AbstractSearchUsersRepositoryResultDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/search-users-repository-result.dto.abstract';
 
 @Injectable()
 export class UsersRepositoryService extends AbstractUsersRepositoryService {
@@ -102,7 +104,6 @@ export class UsersRepositoryService extends AbstractUsersRepositoryService {
         .update({
           ...Object.entries(dto).reduce((acc, [key, value]) => {
             if (key !== 'id') {
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
               acc[key] = value;
             }
 
@@ -144,23 +145,23 @@ export class UsersRepositoryService extends AbstractUsersRepositoryService {
   public async searchUsers(
     dto: AbstractSearchUsersRepositoryDto,
   ): Promise<
-    Either<InternalServerError, AbstractSearchUsersRepositoryResultDto[]>
+    Either<InternalServerError, AbstractSearchUsersRepositoryResultDto>
   > {
     try {
       const limit = dto.limit ? Math.min(dto.limit, 100) : 10;
       const page = dto.page && dto.page > 0 ? dto.page : 1;
       const offset = (page - 1) * limit;
 
-      const query = knex<UsersModel>('users').select(
-        'users.id',
-        'users.email',
-        'users.firstName',
-        'users.lastName',
-        'users.birthdate',
-        'users.document',
-        'users.documentType',
-        'users.createdAt',
-        'users.updatedAt',
+      const query = knex<Array<Omit<UsersModel, 'password'>>>('users').select(
+        'id',
+        'email',
+        'firstName',
+        'lastName',
+        'birthdate',
+        'document',
+        'documentType',
+        'createdAt',
+        'updatedAt',
       );
 
       // Filtros na tabela de users
@@ -228,17 +229,16 @@ export class UsersRepositoryService extends AbstractUsersRepositoryService {
       // Aplica paginação
       query.limit(limit).offset(offset);
 
-      const users = ((await query) as Omit<UsersModel, 'password'>[]) ?? [];
-      const result = users.map(
-        (user) =>
-          new SearchUsersRepositoryResultDto({
-            ...user,
-            page,
-            limit,
-          }),
-      );
+      const users: Array<Omit<UsersModel, 'password'>> = await query;
 
-      return right(result);
+      return right(
+        new SearchUsersRepositoryResultDto({
+          data: users.map((user) => new UserRepositoryDto(user)),
+          page,
+          limit,
+          total: users.length,
+        }),
+      );
     } catch (error) {
       console.error('UserRepositoryService error: searchUsers', error);
       return left(new InternalServerError());

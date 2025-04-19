@@ -11,4 +11,4 @@ interface UsersModel {
   updatedAt: Date;
 }
 
-type UserModelDocumentType = 'CPF';
+type UserModelDocumentType = 'CPF' | 'CNPJ';

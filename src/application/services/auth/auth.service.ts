@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { AbstractCryptoHelperService } from '@/core/abstractions/helpers/crypto-helper.service.abstract';
-import { AbstractAuthService } from '@/core/abstractions/services/auth/auth.service.abstract';
+
+import { AbstractAuthService } from '@/core/abstractions/application/services/auth/auth.service.abstract';
+import { AbstractCryptoHelperService } from '@/core/abstractions/shared/helpers/crypto-helper.service.abstract';
 
 @Injectable()
 export class AuthService extends AbstractAuthService {

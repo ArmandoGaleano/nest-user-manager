@@ -1,5 +1,5 @@
-import { AbstractRoleEntity } from '@/core/abstractions/entities/role.abstract';
-import { IRoleEntity } from '@/core/interfaces/entities/roles/role.interface';
+import { AbstractRoleEntity } from '@/core/abstractions/domain/entities/role.abstract';
+import { IRoleEntity } from '@/core/interfaces/domain/entities/roles/role.interface';
 
 export class RoleEntity extends AbstractRoleEntity {
   get id() {

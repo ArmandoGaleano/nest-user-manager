@@ -1,14 +1,13 @@
-import { AbstractSearchUsersRepositoryDto } from '@/core/abstractions/dtos/repositories/users/search-users-repository.dto.abstract';
-import { AbstractUserRepositoryDto } from '@/core/abstractions/dtos/repositories/users/user-repository.dto.abstract';
-import { AbstractUsersRepositoryService } from '@/core/abstractions/repositories/users.repository.service.abstract';
-import { AbstractSearchUsersUseCase } from '@/core/abstractions/use-cases/users/search-users.use-case.abstract';
-import { Either, Left, right } from '@/shared/either';
+import { AbstractSearchUsersUseCase } from '@/core/abstractions/application/use-cases/users/search-users.use-case.abstract';
+import { Either, left, Left, right } from '@/shared/either';
 import { InternalServerError } from '@/core/errors/InternalServerError.error';
 import { Injectable } from '@nestjs/common';
-import { AbstractUserValidationService } from '@/core/abstractions/services/users/user-validation.service.abstract';
+import { AbstractUserValidationService } from '@/core/abstractions/application/services/users/user-validation.service.abstract';
 import { z } from 'zod';
-import { SearchUsersRepositoryDto } from '@/core/dtos/repositories/users/search-users-repository.dto';
-import { AbstractSearchUsersRepositoryResultDto } from '@/core/abstractions/dtos/repositories/users/search-users-repository-result.dto.abstract';
+import { SearchUsersRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/search-users-repository.dto';
+import { AbstractUsersRepositoryService } from '@/core/abstractions/infrastructure/repositories/users.repository.service.abstract';
+import { AbstractSearchUsersRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/search-users-repository.dto.abstract';
+import { AbstractSearchUsersRepositoryResultDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/search-users-repository-result.dto.abstract';
 
 @Injectable()
 export class SearchUsersUseCase extends AbstractSearchUsersUseCase {
@@ -25,24 +24,31 @@ export class SearchUsersUseCase extends AbstractSearchUsersUseCase {
           [x: string]: any;
         }>
       | InternalServerError,
-      AbstractSearchUsersRepositoryResultDto[]
+      AbstractSearchUsersRepositoryResultDto
     >
   > {
-    const eitherValidateSearchUsersResult =
-      this.UserValidationService.validateSearchUsersSchema(dto);
+    try {
+      const eitherValidateSearchUsersResult =
+        this.UserValidationService.validateSearchUsersSchema(dto);
 
-    if (eitherValidateSearchUsersResult instanceof Left) {
-      return eitherValidateSearchUsersResult;
+      if (eitherValidateSearchUsersResult instanceof Left) {
+        return eitherValidateSearchUsersResult;
+      }
+
+      const eitherSearchUsers = await this.UsersRepositoryService.searchUsers(
+        new SearchUsersRepositoryDto(eitherValidateSearchUsersResult.value),
+      );
+
+      if (eitherSearchUsers instanceof Left) {
+        throw eitherSearchUsers.value;
+      }
+
+      return right(eitherSearchUsers.value);
+    } catch (error) {
+      console.error('Error on SearchUsersUseCase');
+      console.error(error);
+
+      return left(new InternalServerError());
     }
-
-    const eitherSearchUsers = await this.UsersRepositoryService.searchUsers(
-      new SearchUsersRepositoryDto(eitherValidateSearchUsersResult.value),
-    );
-
-    if (eitherSearchUsers instanceof Left) {
-      return eitherSearchUsers;
-    }
-
-    return right(eitherSearchUsers.value);
   }
 }

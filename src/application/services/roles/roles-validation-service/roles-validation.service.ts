@@ -1,62 +1,40 @@
-import { AbstractRolesRepositoryService } from '@/core/abstractions/repositories/roles.repository.service.abstract';
-import { AbstractRolesValidationService } from '@/core/abstractions/services/roles/roles-validation.service.abstract';
+import { AbstractRolesValidationService } from '@/core/abstractions/application/services/roles/roles-validation.service.abstract';
 
 import { Either, Left, left, Right, right } from '@/shared/either';
 import { z } from 'zod';
 
-import { AbstractCreateRoleRepositoryDto } from '@/core/abstractions/dtos/repositories/roles/create-role-repository.dto.abstract';
-
-import { createRoleDtoZodSchema } from './schema/create-role-dto-schema';
-
-import { RoleAlreadyExistError } from '@/core/errors/services/roles/roles-validation-service/RoleAlreadyExistError.error';
+import { RoleAlreadyExistError } from '@/core/errors/application/services/roles/roles-validation-service/RoleAlreadyExistError.error';
 import { InternalServerError } from '@/core/errors/InternalServerError.error';
-import { RoleNotFoundError } from '@/core/errors/services/roles/roles-validation-service/RoleNotFoundError.error';
-import { AbstractRoleRepositoryDto } from '@/core/abstractions/dtos/repositories/roles/role-repository.dto.abstract';
+import { RoleNotFoundError } from '@/core/errors/application/services/roles/roles-validation-service/RoleNotFoundError.error';
+
 import { Injectable } from '@nestjs/common';
-import { SearchRolesRepositoryDto } from '@/core/dtos/repositories/roles/search-roles-repository.dto';
+import { SearchRolesRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/roles/search-roles-repository.dto';
+
+import { IReadRoleRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/roles/read-role-repository.dto.interface';
+import { ReadRoleRepositoryDtoSchema } from './schema/repository/read-role-repository.dto.schema';
+
+import { IUpdateRoleRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/roles/update-role-repository.dto.interface';
+import { UpdateRoleRepositoryDtoSchema } from './schema/repository/update-role-repository.dto.schema';
+import { DeleteRoleRepositoryDtoSchema } from './schema/repository/delete-role-repository.dto.schema';
+
+import { IDeleteRoleRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/roles/delete-role-repository.dto.interface';
+import { ReadRoleRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/roles/read-role-repository.dto';
+
+import { CreateRoleRepositoryDtoSchema } from './schema/repository/create-role-repository.dto.schema';
+import { AbstractRolesRepositoryService } from '@/core/abstractions/infrastructure/repositories/roles.repository.service.abstract';
+import { AbstractCreateRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/roles/create-role-repository.dto.abstract';
+import { AbstractReadRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/roles/read-role-repository.dto.abstract';
+import { AbstractUpdateRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/roles/update-role-repository.dto.abstract';
+import { AbstractDeleteRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/roles/delete-role-repository.dto.abstract';
+import { RolesModel } from '@/infrastructure/persistence/database-models/roles.model';
+import { AbstractSearchRolesRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/roles/search-roles-repository.dto.abstract';
+import { ISearchRolesRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/roles/search-roles-repository.dto.interface';
+import { SearchRoleRepositoryDtoSchema } from './schema/repository/search-role-repository.dto.schema';
 
 @Injectable()
 export class RolesValidationService extends AbstractRolesValidationService {
   constructor(private RolesRepositoryService: AbstractRolesRepositoryService) {
     super();
-  }
-
-  private validateDtoSchema<TDto>({
-    currentMethodName,
-    zodSchema,
-    dto,
-  }: {
-    currentMethodName: string;
-    zodSchema:
-      | z.ZodObject<any, any>
-      | z.ZodEffects<
-          z.ZodObject<any>,
-          {
-            [x: string]: any;
-          }
-        >;
-    dto: TDto;
-  }): Either<
-    | z.ZodError<{
-        [x: string]: any;
-      }>
-    | InternalServerError,
-    TDto
-  > {
-    try {
-      const { data = {}, error } = zodSchema.safeParse(dto);
-
-      if (error) {
-        return left(error);
-      }
-
-      return right(data as TDto);
-    } catch (error) {
-      console.error(`${currentMethodName} error when executing validateDto`);
-      console.error(error);
-
-      return left(new InternalServerError());
-    }
   }
 
   public validateCreateRoleSchema(dto: AbstractCreateRoleRepositoryDto): Either<
@@ -67,8 +45,67 @@ export class RolesValidationService extends AbstractRolesValidationService {
     AbstractCreateRoleRepositoryDto
   > {
     return this.validateDtoSchema<AbstractCreateRoleRepositoryDto>({
-      currentMethodName: 'validateCreateRole',
-      zodSchema: createRoleDtoZodSchema,
+      currentMethodName: 'validateCreateRoleSchema',
+      zodSchema: new CreateRoleRepositoryDtoSchema(),
+      dto,
+    });
+  }
+  public validateReadRoleSchema(dto: AbstractReadRoleRepositoryDto): Either<
+    | z.ZodError<{
+        [x: string]: any;
+      }>
+    | InternalServerError,
+    IReadRoleRepositoryDto
+  > {
+    return this.validateDtoSchema<IReadRoleRepositoryDto>({
+      currentMethodName: 'validateReadRoleSchema',
+      zodSchema: new ReadRoleRepositoryDtoSchema(),
+      dto,
+    });
+  }
+
+  public validateUpdateRoleSchema(dto: AbstractUpdateRoleRepositoryDto): Either<
+    | z.ZodError<{
+        [x: string]: any;
+      }>
+    | InternalServerError,
+    IUpdateRoleRepositoryDto
+  > {
+    return this.validateDtoSchema<IUpdateRoleRepositoryDto>({
+      currentMethodName: 'validateUpdateRoleSchema',
+      zodSchema: new UpdateRoleRepositoryDtoSchema(),
+      dto,
+    });
+  }
+
+  public validateDeleteRoleRepositoryDtoSchema(
+    dto: AbstractDeleteRoleRepositoryDto,
+  ): Either<
+    | z.ZodError<{
+        [x: string]: any;
+      }>
+    | InternalServerError,
+    IDeleteRoleRepositoryDto
+  > {
+    return this.validateDtoSchema<IDeleteRoleRepositoryDto>({
+      currentMethodName: 'deleteRoleDtoZodSchema',
+      zodSchema: new DeleteRoleRepositoryDtoSchema(),
+      dto,
+    });
+  }
+
+  public validateSearchRolesRepositoryDtoSchema(
+    dto: AbstractSearchRolesRepositoryDto,
+  ): Either<
+    | z.ZodError<{
+        [x: string]: any;
+      }>
+    | InternalServerError,
+    ISearchRolesRepositoryDto
+  > {
+    return this.validateDtoSchema<ISearchRolesRepositoryDto>({
+      currentMethodName: 'validateSearchRolesRepositoryDtoSchema',
+      zodSchema: new SearchRoleRepositoryDtoSchema(),
       dto,
     });
   }
@@ -95,10 +132,18 @@ export class RolesValidationService extends AbstractRolesValidationService {
       const validateRoleDtoValue = eitherValidateRoleDto.value;
 
       const eitherRolesExists = await this.validateRolesExists([
-        validateRoleDtoValue.name,
+        { name: validateRoleDtoValue.name },
       ]);
 
-      if (eitherRolesExists instanceof Right) {
+      if (eitherRolesExists instanceof Left) {
+        if (eitherRolesExists.value instanceof InternalServerError) {
+          throw eitherRolesExists.value;
+        }
+
+        return left(eitherRolesExists.value);
+      }
+
+      if (eitherRolesExists.value.exists) {
         return left(new RoleAlreadyExistError());
       }
 
@@ -111,18 +156,132 @@ export class RolesValidationService extends AbstractRolesValidationService {
     }
   }
 
-  async validateRolesExists(
-    roles: Array<RolesModel['name']>,
+  public async validateUpdateRole(
+    dto: AbstractUpdateRoleRepositoryDto,
   ): Promise<
-    Either<InternalServerError | RoleNotFoundError, AbstractRoleRepositoryDto[]>
+    Either<
+      | z.ZodError<{
+          [x: string]: any;
+        }>
+      | InternalServerError
+      | RoleAlreadyExistError,
+      IUpdateRoleRepositoryDto
+    >
   > {
     try {
+      const eitherValidateRoleDto = this.validateUpdateRoleSchema(dto);
+
+      if (eitherValidateRoleDto instanceof Left) {
+        return left(eitherValidateRoleDto.value);
+      }
+
+      const validateRoleDtoValue = eitherValidateRoleDto.value;
+
+      if (typeof validateRoleDtoValue.name === 'string') {
+        const eitherRolesExists = await this.validateRolesExists([
+          { name: validateRoleDtoValue.name },
+        ]);
+
+        if (eitherRolesExists instanceof Left) {
+          if (eitherRolesExists.value instanceof InternalServerError) {
+            throw eitherRolesExists.value;
+          }
+
+          return left(eitherRolesExists.value);
+        }
+
+        if (eitherRolesExists.value.exists === true) {
+          return left(new RoleAlreadyExistError());
+        }
+      }
+
+      return right(validateRoleDtoValue);
+    } catch (error) {
+      console.error('RolesValidationService error: validateUpdateRole');
+      console.error(error);
+
+      return left(new InternalServerError());
+    }
+  }
+
+  public async validateDeleteRole(
+    dto: AbstractDeleteRoleRepositoryDto,
+  ): Promise<
+    Either<
+      | z.ZodError<{
+          [x: string]: any;
+        }>
+      | RoleNotFoundError
+      | InternalServerError,
+      IDeleteRoleRepositoryDto
+    >
+  > {
+    try {
+      const eitherDeleteRoleDto =
+        this.validateDeleteRoleRepositoryDtoSchema(dto);
+
+      if (eitherDeleteRoleDto instanceof Left) {
+        return left(eitherDeleteRoleDto.value);
+      }
+
+      const eitherReadRole = await this.RolesRepositoryService.readRole(
+        new ReadRoleRepositoryDto({
+          id: eitherDeleteRoleDto.value.id,
+        }),
+      );
+
+      if (eitherReadRole instanceof Left) {
+        return left(eitherReadRole.value);
+      }
+
+      if (eitherReadRole.value === undefined) {
+        return left(
+          new RoleNotFoundError([{ id: eitherDeleteRoleDto.value.id }]),
+        );
+      }
+
+      return right(eitherDeleteRoleDto.value);
+    } catch (error) {
+      console.error('RolesValidationService error: deleteRoleDto');
+      console.error(error);
+
+      return left(new InternalServerError());
+    }
+  }
+
+  async validateRolesExists(
+    roles: Array<{
+      id?: RolesModel['id'];
+      name?: RolesModel['name'];
+    }>,
+  ): Promise<
+    Either<
+      InternalServerError,
+      | {
+          exists: false;
+          nonExistentRoles: Array<{
+            id?: RolesModel['id'];
+            name?: RolesModel['name'];
+          }>;
+        }
+      | { exists: true }
+    >
+  > {
+    if (roles?.some((role) => !role?.name?.length && !role?.id?.length)) {
+      throw new Error(
+        'RolesValidationService: validateRolesExists: roles must have at least one name or id',
+      );
+    }
+
+    try {
       const rolesPromise = await Promise.all(
-        roles.map(async (role) => {
+        roles.map(async ({ id, name }) => {
           const eitherSearchRolesResult =
             await this.RolesRepositoryService.searchRoles(
               new SearchRolesRepositoryDto({
-                name: role,
+                id,
+                name,
+                enableExactSearch: true,
               }),
             );
 
@@ -134,7 +293,7 @@ export class RolesValidationService extends AbstractRolesValidationService {
             return null;
           }
 
-          return eitherSearchRolesResult.value[0];
+          return eitherSearchRolesResult?.value[0];
         }),
       );
 
@@ -146,17 +305,20 @@ export class RolesValidationService extends AbstractRolesValidationService {
 
           return null;
         })
-        ?.filter((index) => index !== null);
+        .filter((index) => index !== null);
 
       if (nonExistentRolesIndexes.length) {
         const nonExistentRoles = nonExistentRolesIndexes.map(
           (index) => roles[index],
         );
 
-        return left(new RoleNotFoundError(nonExistentRoles));
+        return right({
+          exists: false,
+          nonExistentRoles,
+        });
       }
 
-      return right(rolesPromise as AbstractRoleRepositoryDto[]);
+      return right({ exists: true });
     } catch (error) {
       console.error('RolesValidationService error: validateRolesExists');
       console.error(error);

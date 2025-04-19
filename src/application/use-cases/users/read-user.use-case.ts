@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import type { IReadUserUseCase } from '../../../core/interfaces/use-cases/users/read-user-use-case.interface';
-import { AbstractReadUserRepositoryDto } from '@/core/abstractions/dtos/repositories/users/read-user-repository.dto.abstract';
-import { AbstractUsersRepositoryService } from '@/core/abstractions/repositories/users.repository.service.abstract';
+
 import { Either, left, Left, right } from '@/shared/either';
-import { AbstractUserValidationService } from '@/core/abstractions/services/users/user-validation.service.abstract';
+import { AbstractUserValidationService } from '@/core/abstractions/application/services/users/user-validation.service.abstract';
 import { InternalServerError } from '@/core/errors/InternalServerError.error';
 import { z } from 'zod';
-import { AbstractReadUserUseCase } from '@/core/abstractions/use-cases/users/read-user.use-case.abstract';
-import { ReadUserRepositoryDto } from '@/core/dtos/repositories/users/read-user-repository.dto';
+import { AbstractReadUserUseCase } from '@/core/abstractions/application/use-cases/users/read-user.use-case.abstract';
+import { ReadUserRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/read-user-repository.dto';
+import { AbstractUsersRepositoryService } from '@/core/abstractions/infrastructure/repositories/users.repository.service.abstract';
+import { AbstractReadUserRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/read-user-repository.dto.abstract';
 
 @Injectable()
 export class ReadUserUseCase extends AbstractReadUserUseCase {

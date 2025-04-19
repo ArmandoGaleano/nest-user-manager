@@ -1,17 +1,20 @@
 import { Injectable } from '@nestjs/common';
-import { AbstractRolesRepositoryService } from '@/core/abstractions/repositories/roles.repository.service.abstract';
+
 import { Either, Left, left, right } from '@/shared/either';
 import { knex } from '@/infrastructure/persistence/knex';
 
-import { AbstractRoleRepositoryDto } from '@/core/abstractions/dtos/repositories/roles/role-repository.dto.abstract';
-import { AbstractCreateRoleRepositoryDto } from '@/core/abstractions/dtos/repositories/roles/create-role-repository.dto.abstract';
-import { RoleDto } from '@/core/dtos/repositories/roles/role-repository.dto';
-import { AbstractReadRoleRepositoryDto } from '@/core/abstractions/dtos/repositories/roles/read-role-repository.dto.abstract';
-import { AbstractUpdateRoleRepositoryDto } from '@/core/abstractions/dtos/repositories/roles/update-role-repository.dto.abstract';
-import { AbstractDeleteRoleRepositoryDto } from '@/core/abstractions/dtos/repositories/roles/delete-role-repository.dto.abstract';
-import { AbstractSearchRolesRepositoryDto } from '@/core/abstractions/dtos/repositories/roles/search-roles-repository.dto.abstract';
+import { ReadRoleRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/roles/read-role-repository.dto';
+import { RoleDto } from '@/infrastructure/dtos/persistence/repositories/roles/role-repository.dto';
+
 import { InternalServerError } from '@/core/errors/InternalServerError.error';
-import { ReadRoleRepositoryDto } from '@/core/dtos/repositories/roles/read-role-repository.dto';
+import { RolesModel } from '../../database-models/roles.model';
+import { AbstractRolesRepositoryService } from '@/core/abstractions/infrastructure/repositories/roles.repository.service.abstract';
+import { AbstractCreateRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/roles/create-role-repository.dto.abstract';
+import { AbstractRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/roles/role-repository.dto.abstract';
+import { AbstractReadRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/roles/read-role-repository.dto.abstract';
+import { AbstractUpdateRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/roles/update-role-repository.dto.abstract';
+import { AbstractDeleteRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/roles/delete-role-repository.dto.abstract';
+import { AbstractSearchRolesRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/roles/search-roles-repository.dto.abstract';
 
 @Injectable()
 export class RolesRepositoryService extends AbstractRolesRepositoryService {
@@ -31,10 +34,10 @@ export class RolesRepositoryService extends AbstractRolesRepositoryService {
           createdAt: dto.createdAt,
           updatedAt: dto.updatedAt,
         })
-        .returning<UsersModel[]>('*');
+        .returning<RolesModel[]>('*');
 
       if (createRoleSuccess?.[0]?.id?.length) {
-        return right(new RoleDto(dto));
+        return right(new RoleDto(createRoleSuccess?.[0]));
       }
 
       return left(new InternalServerError());
@@ -166,18 +169,38 @@ export class RolesRepositoryService extends AbstractRolesRepositoryService {
         Pick<RolesModel, 'id' | 'name' | 'createdAt' | 'updatedAt'>,
         RolesModel[]
       >('roles')
-        .where((builder) => {
+        .where((query) => {
           if (dto.id) {
-            builder.where('id', dto.id);
+            query.where('id', dto.id);
           }
           if (dto.name) {
-            builder.where('name', dto.name);
+            if (!dto.enableExactSearch) {
+              query.whereRaw('"roles"."name" ILIKE ?', [
+                `%${dto.name.replace(/[%_]/g, '\\$&')}%`,
+              ]);
+            }
+
+            if (dto.enableExactSearch) {
+              query.where('name', dto.name);
+            }
           }
           if (dto.createdAt) {
-            builder.where('createdAt', dto.createdAt);
+            query.where('users.createdAt', dto.createdAt);
+          }
+          if (dto.createdAtStart) {
+            query.where('users.createdAt', '>=', dto.createdAtStart);
+          }
+          if (dto.createdAtEnd) {
+            query.where('users.createdAt', '<=', dto.createdAtEnd);
           }
           if (dto.updatedAt) {
-            builder.where('updatedAt', dto.updatedAt);
+            query.where('users.updatedAt', dto.updatedAt);
+          }
+          if (dto.updatedAtStart) {
+            query.where('users.updatedAt', '>=', dto.updatedAtStart);
+          }
+          if (dto.updatedAtEnd) {
+            query.where('users.updatedAt', '<=', dto.updatedAtEnd);
           }
         })
         .limit(limit)

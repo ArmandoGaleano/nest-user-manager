@@ -1,13 +1,14 @@
-enum EnumDefaultUserRoles {
+export enum EnumDefaultUserRoles {
   ADMIN = 'admin',
   CUSTOMER = 'customer',
 }
-type RoleModelValueType =
+
+export type RoleModelValueType =
   | EnumDefaultUserRoles.ADMIN
   | EnumDefaultUserRoles.CUSTOMER
   | string;
 
-interface RolesModel {
+export interface RolesModel {
   id: string;
   name: RoleModelValueType;
   description: string;

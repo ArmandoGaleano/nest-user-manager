@@ -2,11 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { z } from 'zod';
 import { knex } from 'src/infrastructure/persistence/knex';
 
-import { AbstractDeleteUserUseCase } from '@/core/abstractions/use-cases/users/delete-user.use-case.abstract';
+import { AbstractDeleteUserUseCase } from '@/core/abstractions/application/use-cases/users/delete-user.use-case.abstract';
 import { Either, left, Left, right } from '@/shared/either';
-import { AbstractUserValidationService } from '@/core/abstractions/services/users/user-validation.service.abstract';
+import { AbstractUserValidationService } from '@/core/abstractions/application/services/users/user-validation.service.abstract';
 import { InternalServerError } from '@/core/errors/InternalServerError.error';
-import { AbstractDeleteUserRepositoryDto } from '@/core/abstractions/dtos/repositories/users/delete-user-repository.dto.abstract';
+import { AbstractDeleteUserRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/delete-user-repository.dto.abstract';
 
 @Injectable()
 export class DeleteUserUseCase extends AbstractDeleteUserUseCase {

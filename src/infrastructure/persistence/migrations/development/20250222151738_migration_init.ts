@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-redundant-type-constituents */
 import { Knex } from 'knex';
+import { RolesModel } from '../../database-models/roles.model';
 
 type RoleModelKeys = keyof RolesModel;
 type UserModelKeys = keyof UsersModel;
@@ -24,7 +24,7 @@ export async function up(knex: Knex): Promise<void> {
             .notNullable(),
         };
       })
-      // Criação da tabela de users com o campo CPF
+      // Criação da tabela de users
       .createTable('users', (table) => {
         const _execute: Record<
           UserModelKeys,
