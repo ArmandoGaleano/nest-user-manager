@@ -1,6 +1,7 @@
+import { ApiProperty } from '@nestjs/swagger';
+
 import { AbstractSearchRolesRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/roles/search-roles-repository.dto.abstract';
 import { ISearchRolesRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/roles/search-roles-repository.dto.interface';
-import { ApiProperty } from '@nestjs/swagger';
 
 export class SearchRolesRepositoryDto extends AbstractSearchRolesRepositoryDto {
   @ApiProperty({

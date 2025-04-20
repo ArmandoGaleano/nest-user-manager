@@ -8,8 +8,8 @@ fi
 echo "🔵 Aguardando PostgreSQL ($POSTGRES_HOST:$POSTGRES_PORT) ficar pronto..."
 
 # Loop para testar a conexão com o banco usando pg_isready, passando a senha
-until PGPASSWORD="$POSTGRES_PASSWORD" pg_isready -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "$POSTGRES_USER"; do
-  echo "🔵 Aguardando PostgreSQL ($POSTGRES_HOST:$POSTGRES_PORT) ficar pronto..."
+until PGPASSWORD="$POSTGRES_PASSWORD" psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT 1" > /dev/null 2>&1; do
+  echo "🔵 Aguardando PostgreSQL ($POSTGRES_HOST:$POSTGRES_PORT/$POSTGRES_DB) ficar pronto..."
   sleep 5
 done
 

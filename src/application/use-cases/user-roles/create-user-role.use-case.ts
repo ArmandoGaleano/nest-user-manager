@@ -1,23 +1,25 @@
 import { Injectable } from '@nestjs/common';
-import { Either, Left, left, right } from '@/shared/either';
-import { AbstractRolesValidationService } from '@/core/abstractions/application/services/roles/roles-validation.service.abstract';
 
-import { InternalServerError } from '@/core/errors/InternalServerError.error';
+import { AbstractCreateUserRoleUseCase } from '@/core/abstractions/application/use-cases/user-roles/create-user-role.use-case.abstract';
+
+import { AbstractUserRolesRepositoryService } from '@/core/abstractions/infrastructure/repositories/user-roles.repository.service.abstract';
+import { AbstractRolesValidationService } from '@/core/abstractions/application/services/roles/roles-validation.service.abstract';
+import { AbstractUserRolesValidationService } from '@/core/abstractions/application/services/user-roles/user-roles-validation.service.abstract';
+import { AbstractUserValidationService } from '@/core/abstractions/application/services/users/user-validation.service.abstract';
+import { AbstractSystemDateTimeHelperService } from '@/core/abstractions/shared/helpers/system-date-time-helper.abstract';
+
+import { AbstractCreateUserRoleUseCaseDto } from '@/core/abstractions/application/dtos/use-cases/user-roles/create-user-role-use-case.dto.abstract';
+import { AbstractUserRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/user-roles/user-role-repository.dto.abstract';
+import { CreateUserRoleRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/user-roles/create-user-role-repository.dto';
+
+import { Either, Left, left, right } from '@/shared/either';
 import { z } from 'zod';
 
-import { AbstractSystemDateTimeHelperService } from '@/core/abstractions/shared/helpers/system-date-time-helper.abstract';
-import { AbstractUserRolesRepositoryService } from '@/core/abstractions/infrastructure/repositories/user-roles.repository.service.abstract';
-import { AbstractCreateUserRoleUseCaseDto } from '@/core/abstractions/application/dtos/use-cases/user-roles/create-user-role-use-case.dto.abstract';
-import { AbstractUserRolesValidationService } from '@/core/abstractions/application/services/user-roles/user-roles-validation.service.abstract';
-import { CreateUserRoleRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/user-roles/create-user-role-repository.dto';
-import { ZodSchemaInternalValidationError } from '@/core/errors/ZodSchemaInternalValidation.error';
-import { UserRoleAlreadyExistError } from '@/core/errors/application/services/user-roles/roles-validation-service/UserRoleAlreadyExistError.error';
-import { RoleDoesNotExist } from '@/core/errors/application/services/roles/roles-validation-service/RoleDoesNotExist.error';
-import { AbstractUserRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/user-roles/user-role-repository.dto.abstract';
-import { AbstractCreateUserRoleUseCase } from '@/core/abstractions/application/use-cases/user-roles/create-user-role.use-case.abstract';
-import { AbstractUserValidationService } from '@/core/abstractions/application/services/users/user-validation.service.abstract';
+import { InternalServerError } from '@/core/errors/InternalServerError.error';
+import { RoleDoesNotExistError } from '@/core/errors/application/services/roles/roles-validation-service/RoleDoesNotExistError.error';
 import { UserDoesNotExistsError } from '@/core/errors/application/services/users/user-validation-service/UserDoesNotExistsError.error';
-
+import { UserRoleAlreadyExistError } from '@/core/errors/application/services/user-roles/roles-validation-service/UserRoleAlreadyExistError.error';
+import { ZodSchemaInternalValidationError } from '@/core/errors/ZodSchemaInternalValidation.error';
 @Injectable()
 export class CreateUserRoleUseCase extends AbstractCreateUserRoleUseCase {
   constructor(
@@ -36,7 +38,7 @@ export class CreateUserRoleUseCase extends AbstractCreateUserRoleUseCase {
           [x: string]: any;
         }>
       | InternalServerError
-      | RoleDoesNotExist
+      | RoleDoesNotExistError
       | UserRoleAlreadyExistError
       | UserDoesNotExistsError,
       AbstractUserRoleRepositoryDto
@@ -90,7 +92,7 @@ export class CreateUserRoleUseCase extends AbstractCreateUserRoleUseCase {
       }
 
       if (!eitherValidateRoleExists.value.exists) {
-        return left(new RoleDoesNotExist());
+        return left(new RoleDoesNotExistError());
       }
 
       // Validate user existence

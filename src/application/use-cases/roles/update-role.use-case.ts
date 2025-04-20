@@ -1,17 +1,20 @@
 import { Injectable } from '@nestjs/common';
-import { AbstractUpdateRoleUseCaseDto } from '@/core/abstractions/application/dtos/use-cases/roles/update-role-use-case.dto.abstract';
-
-import { AbstractRolesValidationService } from '@/core/abstractions/application/services/roles/roles-validation.service.abstract';
 
 import { AbstractUpdateRoleUseCase } from '@/core/abstractions/application/use-cases/roles/update-role.use-case.abstract';
+
+import { AbstractRolesRepositoryService } from '@/core/abstractions/infrastructure/repositories/roles.repository.service.abstract';
+import { AbstractRolesValidationService } from '@/core/abstractions/application/services/roles/roles-validation.service.abstract';
+import { AbstractSystemDateTimeHelperService } from '@/core/abstractions/shared/helpers/system-date-time-helper.abstract';
+
+import { AbstractUpdateRoleUseCaseDto } from '@/core/abstractions/application/dtos/use-cases/roles/update-role-use-case.dto.abstract';
+import { AbstractRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/roles/role-repository.dto.abstract';
 import { UpdateRoleRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/roles/update-role-repository.dto';
-import { InternalServerError } from '@/core/errors/InternalServerError.error';
-import { RoleAlreadyExistError } from '@/core/errors/application/services/roles/roles-validation-service/RoleAlreadyExistError.error';
+
 import { Either, left, Left } from '@/shared/either';
 import { z } from 'zod';
-import { AbstractRolesRepositoryService } from '@/core/abstractions/infrastructure/repositories/roles.repository.service.abstract';
-import { AbstractSystemDateTimeHelperService } from '@/core/abstractions/shared/helpers/system-date-time-helper.abstract';
-import { AbstractRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/roles/role-repository.dto.abstract';
+
+import { InternalServerError } from '@/core/errors/InternalServerError.error';
+import { RoleAlreadyExistError } from '@/core/errors/application/services/roles/roles-validation-service/RoleAlreadyExistError.error';
 
 @Injectable()
 export class UpdateRoleUseCase extends AbstractUpdateRoleUseCase {

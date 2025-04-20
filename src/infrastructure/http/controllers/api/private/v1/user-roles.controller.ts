@@ -2,7 +2,6 @@ import {
   Controller,
   Get,
   Post,
-  Patch,
   Delete,
   Req,
   Query,
@@ -10,25 +9,25 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 
+import { AbstractCreateUserRoleUseCase } from '@/core/abstractions/application/use-cases/user-roles/create-user-role.use-case.abstract';
+import { AbstractDeleteUserRoleUseCase } from '@/core/abstractions/application/use-cases/user-roles/delete-user-role.use-case.abstract';
+import { AbstractSearchUserRoleUseCase } from '@/core/abstractions/application/use-cases/user-roles/search-user-role.use-case.abstract';
+
+import { ICreateUserRoleUseCaseDto } from '@/core/interfaces/application/dtos/use-cases/user-roles/create-user-role-use-case.dto.interface';
+import { IDeleteUserRoleUseCaseDto } from '@/core/interfaces/application/dtos/use-cases/user-roles/delete-user-role.use-case.dto.interface';
+import { ISearchUserRoleRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/user-roles/search-user-role-repository.dto.interface';
+
+import { CreateUserRoleUseCaseDto } from '@/application/dtos/use-cases/user-roles/create-user-role.use-case.dto';
+import { DeleteUserRoleUseCaseDto } from '@/application/dtos/use-cases/user-roles/delete-user-role.use-case.dto';
+import { SearchUserRoleRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/user-roles/search-user-role-repository.dto';
+
 import { Left } from '@/shared/either';
 import { z } from 'zod';
 
-import { AbstractCreateUserRoleUseCase } from '@/core/abstractions/application/use-cases/user-roles/create-user-role.use-case.abstract';
-import { RoleDoesNotExist } from '@/core/errors/application/services/roles/roles-validation-service/RoleDoesNotExist.error';
-
-import { AbstractDeleteUserRoleUseCase } from '@/core/abstractions/application/use-cases/user-roles/delete-user-role.use-case.abstract';
-import { UserRoleDoesNotExistError } from '@/core/errors/application/services/user-roles/roles-validation-service/UserRoleDoesNotExistError.error';
-import { ICreateUserRoleUseCaseDto } from '@/core/interfaces/application/dtos/use-cases/user-roles/create-user-role-use-case.dto.interface';
-import { CreateUserRoleUseCaseDto } from '@/application/dtos/use-cases/user-roles/create-user-role.use-case.dto';
-
-import { DeleteUserRoleUseCaseDto } from '@/application/dtos/use-cases/user-roles/delete-user-role.use-case.dto';
-import { IDeleteUserRoleUseCaseDto } from '@/core/interfaces/application/dtos/use-cases/user-roles/delete-user-role.use-case.dto.interface';
+import { InternalServerError } from '@/core/errors/InternalServerError.error';
 import { UserRoleAlreadyExistError } from '@/core/errors/application/services/user-roles/roles-validation-service/UserRoleAlreadyExistError.error';
 import { UserDoesNotExistsError } from '@/core/errors/application/services/users/user-validation-service/UserDoesNotExistsError.error';
-import { ISearchUserRoleRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/user-roles/search-user-role-repository.dto.interface';
-import { AbstractSearchUserRoleUseCase } from '@/core/abstractions/application/use-cases/user-roles/search-user-role.use-case.abstract';
-import { SearchUserRoleRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/user-roles/search-user-role-repository.dto';
-import { InternalServerError } from '@/core/errors/InternalServerError.error';
+import { RoleDoesNotExistError } from '@/core/errors/application/services/roles/roles-validation-service/RoleDoesNotExistError.error';
 
 @Controller('user-roles')
 export class UserRolesV1Controller {
@@ -41,101 +40,121 @@ export class UserRolesV1Controller {
   @Post()
   async createUserRole(
     @Req() request: Request,
-    @Body() createUserRoleDto: ICreateUserRoleUseCaseDto,
+    @Body() createUserRoleUseCaseDto: ICreateUserRoleUseCaseDto,
   ) {
     try {
-      const eitherCreateUserResult = await this.CreateUserRoleUseCase.execute(
-        new CreateUserRoleUseCaseDto(createUserRoleDto),
-      );
+      const eitherCreateUserRoleUseCase =
+        await this.CreateUserRoleUseCase.execute(
+          new CreateUserRoleUseCaseDto(createUserRoleUseCaseDto),
+        );
 
-      if (eitherCreateUserResult instanceof Left) {
-        if (eitherCreateUserResult.value instanceof z.ZodError) {
+      if (eitherCreateUserRoleUseCase instanceof Left) {
+        if (eitherCreateUserRoleUseCase.value instanceof z.ZodError) {
           request.res?.status(400);
-          return { messages: eitherCreateUserResult.value.message };
+          return { messages: eitherCreateUserRoleUseCase.value.message };
         }
 
-        if (eitherCreateUserResult.value instanceof RoleDoesNotExist) {
+        if (
+          eitherCreateUserRoleUseCase.value instanceof RoleDoesNotExistError
+        ) {
           request.res?.status(404);
-          return { message: eitherCreateUserResult.value.message };
+          return { message: eitherCreateUserRoleUseCase.value.message };
         }
 
-        if (eitherCreateUserResult.value instanceof UserRoleAlreadyExistError) {
+        if (
+          eitherCreateUserRoleUseCase.value instanceof UserRoleAlreadyExistError
+        ) {
           request.res?.status(409);
-          return { message: eitherCreateUserResult.value.message };
+          return { message: eitherCreateUserRoleUseCase.value.message };
         }
-        if (eitherCreateUserResult.value instanceof UserDoesNotExistsError) {
+        if (
+          eitherCreateUserRoleUseCase.value instanceof UserDoesNotExistsError
+        ) {
           request.res?.status(409);
-          return { message: eitherCreateUserResult.value.message };
+          return { message: eitherCreateUserRoleUseCase.value.message };
         }
 
-        request.res?.status(500);
-        return { message: eitherCreateUserResult.value.message };
+        throw eitherCreateUserRoleUseCase.value;
       }
 
       request.res?.status(201);
-      return eitherCreateUserResult.value;
-    } catch {
-      console.log('error');
+      return eitherCreateUserRoleUseCase.value;
+    } catch (error) {
+      console.error(
+        'UserRolesV1Controller error when executing createUserRole',
+      );
+      console.error(error);
+
+      request.res?.status(500);
+      return { message: 'Internal server error' };
     }
   }
 
   @Delete()
   async deleteUserRole(
     @Req() request: Request,
-    @Query() deleteRoleUseCaseDto: IDeleteUserRoleUseCaseDto,
+    @Query() deleteUserRoleUseCaseDto: IDeleteUserRoleUseCaseDto,
   ) {
     try {
-      const eitherDeleteRoleResult = await this.DeleteUserRoleUseCase.execute(
-        new DeleteUserRoleUseCaseDto(deleteRoleUseCaseDto),
-      );
+      const eitherDeleteUserRoleUseCase =
+        await this.DeleteUserRoleUseCase.execute(
+          new DeleteUserRoleUseCaseDto(deleteUserRoleUseCaseDto),
+        );
 
-      if (eitherDeleteRoleResult instanceof Left) {
-        if (eitherDeleteRoleResult.value instanceof z.ZodError) {
+      if (eitherDeleteUserRoleUseCase instanceof Left) {
+        if (eitherDeleteUserRoleUseCase.value instanceof z.ZodError) {
           request.res?.status(400);
-          return { messages: eitherDeleteRoleResult.value.message };
+          return { messages: eitherDeleteUserRoleUseCase.value.message };
         }
 
-        if (eitherDeleteRoleResult.value instanceof UserRoleDoesNotExistError) {
+        if (
+          eitherDeleteUserRoleUseCase.value instanceof RoleDoesNotExistError
+        ) {
           request.res?.status(404);
-          return { message: eitherDeleteRoleResult.value.message };
+          return { message: eitherDeleteUserRoleUseCase.value.message };
         }
 
-        request.res?.status(500);
-        return { message: eitherDeleteRoleResult.value.message };
+        throw eitherDeleteUserRoleUseCase.value;
       }
 
-      if (eitherDeleteRoleResult.value === false) {
+      if (eitherDeleteUserRoleUseCase.value === false) {
         request.res?.status(404);
         return { message: 'User role does not exist' };
       }
 
-      return eitherDeleteRoleResult.value;
-    } catch {
-      console.log('error');
+      return eitherDeleteUserRoleUseCase.value;
+    } catch (error) {
+      console.error(
+        'UserRolesV1Controller error when executing deleteUserRole',
+      );
+      console.error(error);
+
+      request.res?.status(500);
+      return { message: 'Internal server error' };
     }
   }
 
   @Get('search')
   async searchUserRoles(
     @Req() request: Request,
-    @Query() searchUserRoleDto: ISearchUserRoleRepositoryDto,
+    @Query() searchUserRoleRepositoryDto: ISearchUserRoleRepositoryDto,
   ) {
     try {
-      const eitherSearchUserRoleResult =
+      const eitherSearchUserRoleUseCase =
         await this.SearchUserRoleUseCase.execute(
-          new SearchUserRoleRepositoryDto(searchUserRoleDto),
+          new SearchUserRoleRepositoryDto(searchUserRoleRepositoryDto),
         );
 
-      if (eitherSearchUserRoleResult instanceof Left) {
-        if (eitherSearchUserRoleResult.value instanceof z.ZodError) {
+      if (eitherSearchUserRoleUseCase instanceof Left) {
+        if (eitherSearchUserRoleUseCase.value instanceof z.ZodError) {
           request.res?.status(400);
-          return { messages: eitherSearchUserRoleResult.value.message };
+          return { messages: eitherSearchUserRoleUseCase.value.message };
         }
 
-        throw new InternalServerError();
+        throw eitherSearchUserRoleUseCase.value;
       }
 
-      return eitherSearchUserRoleResult.value;
+      return eitherSearchUserRoleUseCase.value;
     } catch (error) {
       console.error(
         'UserRolesV1Controller error when executing searchUserRoles',

@@ -1,14 +1,18 @@
-import { AbstractSearchUsersUseCase } from '@/core/abstractions/application/use-cases/users/search-users.use-case.abstract';
-import { Either, left, Left, right } from '@/shared/either';
-import { InternalServerError } from '@/core/errors/InternalServerError.error';
 import { Injectable } from '@nestjs/common';
-import { AbstractUserValidationService } from '@/core/abstractions/application/services/users/user-validation.service.abstract';
-import { z } from 'zod';
-import { SearchUsersRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/search-users-repository.dto';
+
+import { AbstractSearchUsersUseCase } from '@/core/abstractions/application/use-cases/users/search-users.use-case.abstract';
+
 import { AbstractUsersRepositoryService } from '@/core/abstractions/infrastructure/repositories/users.repository.service.abstract';
+import { AbstractUserValidationService } from '@/core/abstractions/application/services/users/user-validation.service.abstract';
+
 import { AbstractSearchUsersRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/search-users-repository.dto.abstract';
 import { AbstractSearchUsersRepositoryResultDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/search-users-repository-result.dto.abstract';
+import { SearchUsersRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/search-users-repository.dto';
 
+import { Either, left, Left, right } from '@/shared/either';
+import { z } from 'zod';
+
+import { InternalServerError } from '@/core/errors/InternalServerError.error';
 @Injectable()
 export class SearchUsersUseCase extends AbstractSearchUsersUseCase {
   constructor(

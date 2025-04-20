@@ -1,17 +1,18 @@
 import { Injectable } from '@nestjs/common';
 
-import { Either, left, right } from '@/shared/either';
 import { knex } from '@/infrastructure/persistence/knex';
+import { Either, left, right } from '@/shared/either';
+
+import { AbstractUserRolesRepositoryService } from '@/core/abstractions/infrastructure/repositories/user-roles.repository.service.abstract';
+import { AbstractCreateUserRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/user-roles/create-user-role.dto.abstract';
+import { AbstractSearchUserRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/user-roles/search-user-role.dto.abstract';
+import { AbstractDeleteUserRoleUseCaseDto } from '@/core/abstractions/application/dtos/use-cases/user-roles/delete-user-role.use-case.dto.abstract';
+import { AbstractUserRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/user-roles/user-role-repository.dto.abstract';
+import { UserRoleRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/user-roles/user-role-repository.dto';
+
 import { UserRolesModel } from '../../database-models/user_roles.model';
 
 import { InternalServerError } from '@/core/errors/InternalServerError.error';
-import { UserRoleRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/user-roles/user-role-repository.dto';
-import { AbstractUserRolesRepositoryService } from '@/core/abstractions/infrastructure/repositories/user-roles.repository.service.abstract';
-import { AbstractCreateUserRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/user-roles/create-user-role.dto.abstract';
-import { AbstractUserRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/user-roles/user-role-repository.dto.abstract';
-import { AbstractSearchUserRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/user-roles/search-user-role.dto.abstract';
-import { AbstractDeleteUserRoleUseCaseDto } from '@/core/abstractions/application/dtos/use-cases/user-roles/delete-user-role.use-case.dto.abstract';
-
 @Injectable()
 export class UserRolesRepositoryService extends AbstractUserRolesRepositoryService {
   constructor() {

@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 
-import { AbstractUseCase } from '@/core/abstractions/@base/use-case.abstract';
 import { ICreateRoleUseCase } from '@/core/interfaces/application/use-cases/roles/create-role.use-case.interface';
 
+import { AbstractUseCase } from '@/core/abstractions/@base/use-case.abstract';
 import { AbstractRoleEntity } from '@/core/abstractions/domain/entities/role.abstract';
 import { AbstractCreateRoleUseCaseDto } from '../../dtos/use-cases/roles/create-role-use-case.dto.abstract';
 

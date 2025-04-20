@@ -1,8 +1,9 @@
-import { MainHelperServicesModule } from '@/infrastructure/http/modules/helpers/main.helper.module';
 import { Module } from '@nestjs/common';
-import { useCaseProviders } from './use-cases.providers';
-import { serviceProviders } from './services.providers';
+
+import { MainHelperServicesModule } from '@/infrastructure/http/modules/helpers/main.helper.module';
 import { UserRolesV1Controller } from '@/infrastructure/http/controllers/api/private/v1/user-roles.controller';
+import { serviceProviders } from './services.providers';
+import { useCaseProviders } from './use-cases.providers';
 
 @Module({
   imports: [MainHelperServicesModule],

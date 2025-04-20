@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
-import { UsersV1Controller } from 'src/infrastructure/http/controllers/api/private/v1/users.controller';
+
 import { MainHelperServicesModule } from '../../../../../helpers/main.helper.module';
+import { UsersV1Controller } from 'src/infrastructure/http/controllers/api/private/v1/users.controller';
 import { serviceProviders } from './services.providers';
 import { useCaseProviders } from './use-cases.providers';
 

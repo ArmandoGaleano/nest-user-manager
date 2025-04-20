@@ -1,14 +1,17 @@
-import { DeleteUserRoleUseCaseDto } from '@/application/dtos/use-cases/user-roles/delete-user-role.use-case.dto';
-import { AbstractUserRolesValidationService } from '@/core/abstractions/application/services/user-roles/user-roles-validation.service.abstract';
-import { AbstractDeleteUserRoleUseCase } from '@/core/abstractions/application/use-cases/user-roles/delete-user-role.use-case.abstract';
-import { AbstractDeleteUserRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/user-roles/delete-user-role.dto.abstract';
-import { AbstractUserRolesRepositoryService } from '@/core/abstractions/infrastructure/repositories/user-roles.repository.service.abstract';
-import { UserRoleDoesNotExistError } from '@/core/errors/application/services/user-roles/roles-validation-service/UserRoleDoesNotExistError.error';
-import { InternalServerError } from '@/core/errors/InternalServerError.error';
-import { Either, Left, left } from '@/shared/either';
 import { Injectable } from '@nestjs/common';
+
+import { AbstractDeleteUserRoleUseCase } from '@/core/abstractions/application/use-cases/user-roles/delete-user-role.use-case.abstract';
+
+import { AbstractUserRolesValidationService } from '@/core/abstractions/application/services/user-roles/user-roles-validation.service.abstract';
+import { AbstractUserRolesRepositoryService } from '@/core/abstractions/infrastructure/repositories/user-roles.repository.service.abstract';
+import { AbstractDeleteUserRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/user-roles/delete-user-role.dto.abstract';
+import { DeleteUserRoleUseCaseDto } from '@/application/dtos/use-cases/user-roles/delete-user-role.use-case.dto';
+
+import { Either, Left, left } from '@/shared/either';
 import { z } from 'zod';
 
+import { InternalServerError } from '@/core/errors/InternalServerError.error';
+import { RoleDoesNotExistError } from '@/core/errors/application/services/roles/roles-validation-service/RoleDoesNotExistError.error';
 @Injectable()
 export class DeleteUserRoleUseCase extends AbstractDeleteUserRoleUseCase {
   constructor(
@@ -24,7 +27,7 @@ export class DeleteUserRoleUseCase extends AbstractDeleteUserRoleUseCase {
           [x: string]: any;
         }>
       | InternalServerError
-      | UserRoleDoesNotExistError,
+      | RoleDoesNotExistError,
       boolean
     >
   > {
@@ -59,7 +62,7 @@ export class DeleteUserRoleUseCase extends AbstractDeleteUserRoleUseCase {
       }
 
       if (eitherValidateUserRoleExists.value.exists === false) {
-        return left(new UserRoleDoesNotExistError());
+        return left(new RoleDoesNotExistError());
       }
 
       const eitherDeleteUserRole =

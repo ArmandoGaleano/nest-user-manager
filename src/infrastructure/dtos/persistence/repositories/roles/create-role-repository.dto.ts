@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+
 import type { ICreateRoleRepositoryDto } from '../../../../../core/interfaces/infrastructure/dtos/repositories/roles/create-role-repository.dto.interface';
 import { AbstractCreateRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/roles/create-role-repository.dto.abstract';
 

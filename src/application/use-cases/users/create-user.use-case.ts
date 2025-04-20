@@ -2,27 +2,28 @@ import { Injectable } from '@nestjs/common';
 
 import { AbstractCreateUserUseCase } from '../../../core/abstractions/application/use-cases/users/create-user.use-case.abstract';
 
-import { z } from 'zod';
-import { Either, Left, left, right } from '@/shared/either';
-
 import { AbstractUserValidationService } from '@/core/abstractions/application/services/users/user-validation.service.abstract';
 import { AbstractRolesValidationService } from '@/core/abstractions/application/services/roles/roles-validation.service.abstract';
 import { AbstractUsersRepositoryService } from '@/core/abstractions/infrastructure/repositories/users.repository.service.abstract';
 import { AbstractUserRolesRepositoryService } from '@/core/abstractions/infrastructure/repositories/user-roles.repository.service.abstract';
+import { AbstractRolesRepositoryService } from '@/core/abstractions/infrastructure/repositories/roles.repository.service.abstract';
 import { AbstractCryptoHelperService } from '@/core/abstractions/shared/helpers/crypto-helper.service.abstract';
 import { AbstractSystemDateTimeHelperService } from '@/core/abstractions/shared/helpers/system-date-time-helper.abstract';
 
 import { AbstractCreateUserUseCaseDto } from '@/core/abstractions/application/dtos/use-cases/users/create-user-use-case.dto.abstract';
-import { AbstractUserEntity } from '@/core/abstractions/domain/entities/user.abstract';
+
+import { UserEntity } from '@/domain/users/user.entity';
 import { CreateUserRoleRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/user-roles/create-user-role-repository.dto';
+import { CreateUserRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/create-user-repository.dto';
+import { ReadRoleRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/roles/read-role-repository.dto';
+import { AbstractUserEntity } from '@/core/abstractions/domain/entities/user.abstract';
+
+import { Either, Left, left, right } from '@/shared/either';
+import { z } from 'zod';
 
 import { InternalServerError } from '@/core/errors/InternalServerError.error';
 import { UserAlreadyExistsError } from '@/core/errors/application/services/users/user-validation-service/UserAlreadyExistsError.error';
-import { UserEntity } from '@/domain/users/user.entity';
 import { RoleNotFoundError } from '@/core/errors/application/services/roles/roles-validation-service/RoleNotFoundError.error';
-import { CreateUserRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/create-user-repository.dto';
-import { AbstractRolesRepositoryService } from '@/core/abstractions/infrastructure/repositories/roles.repository.service.abstract';
-import { ReadRoleRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/roles/read-role-repository.dto';
 
 @Injectable()
 export class CreateUserUseCase extends AbstractCreateUserUseCase {
@@ -158,12 +159,15 @@ export class CreateUserUseCase extends AbstractCreateUserUseCase {
         }),
       );
     } catch (error) {
-      console.error('CreateUserUseCase error: execute');
-      console.error(error);
+      if (error instanceof RoleNotFoundError) {
+        console.warn('CreateUserUseCase error: execute');
+        console.warn(error);
 
-      if (error instanceof Error) {
         return left(error);
       }
+
+      console.error('CreateUserUseCase error: execute');
+      console.error(error);
 
       return left(new InternalServerError());
     }

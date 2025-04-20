@@ -1,8 +1,9 @@
-import { RolesV1Controller } from '@/infrastructure/http/controllers/api/private/v1/roles.controller';
-import { MainHelperServicesModule } from '@/infrastructure/http/modules/helpers/main.helper.module';
 import { Module } from '@nestjs/common';
-import { useCaseProviders } from './use-cases.providers';
+
+import { MainHelperServicesModule } from '@/infrastructure/http/modules/helpers/main.helper.module';
+import { RolesV1Controller } from '@/infrastructure/http/controllers/api/private/v1/roles.controller';
 import { serviceProviders } from './services.providers';
+import { useCaseProviders } from './use-cases.providers';
 
 @Module({
   imports: [MainHelperServicesModule],

@@ -6,6 +6,7 @@ import { z } from 'zod';
 
 import { InternalServerError } from '@/core/errors/InternalServerError.error';
 import { AbstractDeleteUserRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/delete-user-repository.dto.abstract';
+import { UserDoesNotExistsError } from '@/core/errors/application/services/users/user-validation-service/UserDoesNotExistsError.error';
 
 export abstract class AbstractDeleteUserUseCase
   extends AbstractUseCase
@@ -16,7 +17,8 @@ export abstract class AbstractDeleteUserUseCase
       | z.ZodError<{
           [x: string]: any;
         }>
-      | InternalServerError,
+      | InternalServerError
+      | UserDoesNotExistsError,
       boolean
     >
   >;

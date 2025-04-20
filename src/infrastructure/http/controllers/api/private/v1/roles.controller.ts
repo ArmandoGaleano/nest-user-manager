@@ -10,30 +10,28 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 import { AbstractCreateRoleUseCase } from '@/core/abstractions/application/use-cases/roles/create-role.use-case.abstract';
-
 import { AbstractReadRoleUseCase } from '@/core/abstractions/application/use-cases/roles/read-role.use-case.abstract';
+import { AbstractUpdateRoleUseCase } from '@/core/abstractions/application/use-cases/roles/update-role.use-case.abstract';
+import { AbstractDeleteRoleUseCase } from '@/core/abstractions/application/use-cases/roles/delete-role.use-case.abstract';
+import { AbstractSearchRoleUseCase } from '@/core/abstractions/application/use-cases/roles/search-role.use-case.abstract';
+
+import { ICreateRoleUseCaseDto } from '@/core/interfaces/application/dtos/use-cases/roles/create-role-use-case.dto.interface';
+import { IReadRoleRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/roles/read-role-repository.dto.interface';
+import { IUpdateRoleUseCaseDto } from '@/core/interfaces/application/dtos/use-cases/roles/update-role-use-case.dto.interface';
+import { IDeleteRoleRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/roles/delete-role-repository.dto.interface';
+import { ISearchRolesRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/roles/search-roles-repository.dto.interface';
+
+import { CreateRoleUseCaseDto } from '@/application/dtos/use-cases/roles/create-role-use-case.dto';
+import { ReadRoleRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/roles/read-role-repository.dto';
+import { UpdateRoleUseCaseDto } from '@/application/dtos/use-cases/roles/update-role-use-case.dto';
+import { DeleteRoleRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/roles/delete-role-repository.dto';
+import { SearchRolesRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/roles/search-roles-repository.dto';
 
 import { Left } from '@/shared/either';
 import { z } from 'zod';
-import { UserAlreadyExistsError } from '@/core/errors/application/services/users/user-validation-service/UserAlreadyExistsError.error';
 
-import { AbstractUpdateRoleUseCase } from '@/core/abstractions/application/use-cases/roles/update-role.use-case.abstract';
 import { RoleAlreadyExistError } from '@/core/errors/application/services/roles/roles-validation-service/RoleAlreadyExistError.error';
-import { AbstractDeleteRoleUseCase } from '@/core/abstractions/application/use-cases/roles/delete-role.use-case.abstract';
-
 import { RoleNotFoundError } from '@/core/errors/application/services/roles/roles-validation-service/RoleNotFoundError.error';
-
-import { AbstractSearchRoleUseCase } from '@/core/abstractions/application/use-cases/roles/search-role.use-case.abstract';
-import { UpdateRoleUseCaseDto } from '@/application/dtos/use-cases/roles/update-role-use-case.dto';
-import { CreateRoleUseCaseDto } from '@/application/dtos/use-cases/roles/create-role-use-case.dto';
-import { ICreateRoleUseCaseDto } from '@/core/interfaces/application/dtos/use-cases/roles/create-role-use-case.dto.interface';
-import { IReadRoleRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/roles/read-role-repository.dto.interface';
-import { ReadRoleRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/roles/read-role-repository.dto';
-import { IUpdateRoleUseCaseDto } from '@/core/interfaces/application/dtos/use-cases/roles/update-role-use-case.dto.interface';
-import { IDeleteRoleRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/roles/delete-role-repository.dto.interface';
-import { DeleteRoleRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/roles/delete-role-repository.dto';
-import { ISearchRolesRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/roles/search-roles-repository.dto.interface';
-import { SearchRolesRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/roles/search-roles-repository.dto';
 @Controller('roles')
 export class RolesV1Controller {
   constructor(
@@ -47,34 +45,34 @@ export class RolesV1Controller {
   @Post()
   async createRole(
     @Req() request: Request,
-    @Body() createRoleDto: ICreateRoleUseCaseDto,
+    @Body() createRoleUseCaseDto: ICreateRoleUseCaseDto,
   ) {
     try {
-      const eitherCreateUserResult = await this.CreateRoleUseCase.execute(
-        new CreateRoleUseCaseDto(createRoleDto),
+      const eitherCreateRoleUseCase = await this.CreateRoleUseCase.execute(
+        new CreateRoleUseCaseDto(createRoleUseCaseDto),
       );
 
-      if (eitherCreateUserResult instanceof Left) {
-        if (eitherCreateUserResult.value instanceof z.ZodError) {
+      if (eitherCreateRoleUseCase instanceof Left) {
+        if (eitherCreateRoleUseCase.value instanceof z.ZodError) {
           request.res?.status(400);
-          return { messages: eitherCreateUserResult.value.message };
+          return { messages: eitherCreateRoleUseCase.value.message };
         }
 
-        if (eitherCreateUserResult.value instanceof UserAlreadyExistsError) {
+        if (eitherCreateRoleUseCase.value instanceof RoleAlreadyExistError) {
           request.res?.status(409);
-          return { message: eitherCreateUserResult.value.message };
+          return { message: eitherCreateRoleUseCase.value.message };
         }
 
-        request.res?.status(500);
-        return { message: eitherCreateUserResult.value.message };
+        throw eitherCreateRoleUseCase.value;
       }
 
       request.res?.status(201);
-      return eitherCreateUserResult.value.toJSON();
+      return eitherCreateRoleUseCase.value.toJSON();
     } catch (error) {
       console.error('CreateRoleController error: execute');
       console.error(error);
 
+      request.res?.status(500);
       return {
         message: 'Internal server error',
       };
@@ -87,30 +85,31 @@ export class RolesV1Controller {
     @Query() readRoleRepositoryDto: IReadRoleRepositoryDto,
   ) {
     try {
-      const eitherReadUserResult = await this.ReadRoleUseCase.execute(
+      const eitherReadRoleUseCase = await this.ReadRoleUseCase.execute(
         new ReadRoleRepositoryDto(readRoleRepositoryDto),
       );
 
-      if (eitherReadUserResult instanceof Left) {
-        if (eitherReadUserResult.value instanceof z.ZodError) {
+      if (eitherReadRoleUseCase instanceof Left) {
+        if (eitherReadRoleUseCase.value instanceof z.ZodError) {
           request.res?.status(400);
-          return { messages: eitherReadUserResult.value.message };
+          return { messages: eitherReadRoleUseCase.value.message };
         }
 
-        request.res?.status(500);
-        return { message: eitherReadUserResult.value.message };
+        throw eitherReadRoleUseCase.value;
       }
 
-      request.res?.status(200);
-      if (eitherReadUserResult.value) {
-        return eitherReadUserResult.value.toJSON();
+      if (eitherReadRoleUseCase.value) {
+        request.res?.status(200);
+        return eitherReadRoleUseCase.value.toJSON();
       }
 
-      return undefined;
+      request.res?.status(404);
+      return { message: 'Role not found' };
     } catch (error) {
       console.error('ReadRoleController error: execute');
       console.error(error);
 
+      request.res?.status(500);
       return {
         message: 'Internal server error',
       };
@@ -123,32 +122,31 @@ export class RolesV1Controller {
     @Body() updateRoleUseCaseDto: IUpdateRoleUseCaseDto,
   ) {
     try {
-      const eitherUpdateRoleResult = await this.UpdateRoleUseCase.execute(
+      const eitherUpdateRoleUseCase = await this.UpdateRoleUseCase.execute(
         new UpdateRoleUseCaseDto(updateRoleUseCaseDto),
       );
 
-      if (eitherUpdateRoleResult instanceof Left) {
-        if (eitherUpdateRoleResult.value instanceof z.ZodError) {
+      if (eitherUpdateRoleUseCase instanceof Left) {
+        if (eitherUpdateRoleUseCase.value instanceof z.ZodError) {
           request.res?.status(400);
-          return { messages: eitherUpdateRoleResult.value.message };
+          return { messages: eitherUpdateRoleUseCase.value.message };
         }
 
-        if (eitherUpdateRoleResult.value instanceof RoleAlreadyExistError) {
+        if (eitherUpdateRoleUseCase.value instanceof RoleAlreadyExistError) {
           request.res?.status(409);
-          return { message: eitherUpdateRoleResult.value.message };
+          return { message: eitherUpdateRoleUseCase.value.message };
         }
 
-        request.res?.status(500);
-        return { message: eitherUpdateRoleResult.value.message };
+        throw eitherUpdateRoleUseCase.value;
       }
 
       request.res?.status(201);
-
-      return eitherUpdateRoleResult.value.toJSON();
+      return eitherUpdateRoleUseCase.value.toJSON();
     } catch (error) {
       console.error('UpdateRoleController error: execute');
       console.error(error);
 
+      request.res?.status(500);
       return {
         message: 'Internal server error',
       };
@@ -158,37 +156,39 @@ export class RolesV1Controller {
   @Delete()
   async deleteRole(
     @Req() request: Request,
-    @Query() deleteRoleUseCaseDto: IDeleteRoleRepositoryDto,
+    @Query() deleteRoleRepositoryDto: IDeleteRoleRepositoryDto,
   ) {
     try {
-      const eitherDeleteRoleResult = await this.DeleteRoleUseCase.execute(
-        new DeleteRoleRepositoryDto(deleteRoleUseCaseDto),
+      const eitherDeleteRoleUseCase = await this.DeleteRoleUseCase.execute(
+        new DeleteRoleRepositoryDto(deleteRoleRepositoryDto),
       );
 
-      if (eitherDeleteRoleResult instanceof Left) {
-        if (eitherDeleteRoleResult.value instanceof z.ZodError) {
+      if (eitherDeleteRoleUseCase instanceof Left) {
+        if (eitherDeleteRoleUseCase.value instanceof z.ZodError) {
           request.res?.status(400);
-          return { messages: eitherDeleteRoleResult.value.message };
+          return { messages: eitherDeleteRoleUseCase.value.message };
         }
 
-        if (eitherDeleteRoleResult.value instanceof RoleNotFoundError) {
+        if (eitherDeleteRoleUseCase.value instanceof RoleNotFoundError) {
           request.res?.status(404);
-          return { message: eitherDeleteRoleResult.value.message };
+          return { message: eitherDeleteRoleUseCase.value.message };
         }
 
-        request.res?.status(500);
-        return { message: eitherDeleteRoleResult.value.message };
+        throw eitherDeleteRoleUseCase.value;
       }
-      if (eitherDeleteRoleResult.value === false) {
+
+      if (eitherDeleteRoleUseCase.value === false) {
         request.res?.status(404);
         return { message: 'Role not found' };
       }
 
-      return eitherDeleteRoleResult.value;
+      request.res?.status(204);
+      return;
     } catch (error) {
       console.error('DeleteRoleController error: execute');
       console.error(error);
 
+      request.res?.status(500);
       return {
         message: 'Internal server error',
       };
@@ -198,24 +198,24 @@ export class RolesV1Controller {
   @Get('search')
   async searchRoles(
     @Req() request: Request,
-    @Query() deleteRoleUseCaseDto: ISearchRolesRepositoryDto,
+    @Query() searchRolesRepositoryDto: ISearchRolesRepositoryDto,
   ) {
     try {
-      const eitherSearchRolesResult = await this.SearchRoleUseCase.execute(
-        new SearchRolesRepositoryDto(deleteRoleUseCaseDto),
+      const eitherSearchRoleUseCase = await this.SearchRoleUseCase.execute(
+        new SearchRolesRepositoryDto(searchRolesRepositoryDto),
       );
 
-      if (eitherSearchRolesResult instanceof Left) {
-        if (eitherSearchRolesResult.value instanceof z.ZodError) {
+      if (eitherSearchRoleUseCase instanceof Left) {
+        if (eitherSearchRoleUseCase.value instanceof z.ZodError) {
           request.res?.status(400);
 
-          return { messages: eitherSearchRolesResult.value.message };
+          return { messages: eitherSearchRoleUseCase.value.message };
         }
 
-        throw eitherSearchRolesResult.value;
+        throw eitherSearchRoleUseCase.value;
       }
 
-      return eitherSearchRolesResult.value.map((role) => role.toJSON());
+      return eitherSearchRoleUseCase.value.map((role) => role.toJSON());
     } catch (error) {
       console.error('SearchRolesController error: execute');
       console.error(error);

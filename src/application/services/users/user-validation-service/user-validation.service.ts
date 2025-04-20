@@ -1,34 +1,39 @@
 import { Injectable } from '@nestjs/common';
 
-import { z } from 'zod';
-import { Either, Left, left, Right, right } from '@/shared/either';
-
 import { AbstractUserValidationService } from '@/core/abstractions/application/services/users/user-validation.service.abstract';
+
 import { AbstractUsersRepositoryService } from '@/core/abstractions/infrastructure/repositories/users.repository.service.abstract';
 
-import { InternalServerError } from '@/core/errors/InternalServerError.error';
+import { ICreateUserUseCaseDto } from '@/core/interfaces/application/dtos/use-cases/users/create-user-use-case.dto.interface';
+import { ICreateUserRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/users/create-user-repository.dto.interface';
 import { IReadUserRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/users/read-user-repository.dto.interface';
 import { IUpdateUserRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/users/update-user-repository.dto.interface';
 import { IDeleteUserRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/users/delete-user-repository.dto.interface';
 import { ISearchUsersRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/users/search-users-repository.dto.interface';
-import { UserAlreadyExistsError } from '@/core/errors/application/services/users/user-validation-service/UserAlreadyExistsError.error';
-import { SearchUsersRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/search-users-repository.dto';
-import { CreateUserUseCaseDtoSchema } from './schema/use-cases/create-user-use-case.dto.schema';
+
+import { AbstractCreateUserUseCaseDto } from '@/core/abstractions/application/dtos/use-cases/users/create-user-use-case.dto.abstract';
+import { AbstractCreateUserRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/create-user-repository.dto.abstract';
 import { AbstractReadUserRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/read-user-repository.dto.abstract';
 import { AbstractUpdateUserRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/update-user-repository.dto.abstract';
 import { AbstractDeleteUserRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/delete-user-repository.dto.abstract';
 import { AbstractSearchUsersRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/search-users-repository.dto.abstract';
 import { AbstractSearchUsersRepositoryResultDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/search-users-repository-result.dto.abstract';
-import { AbstractCreateUserUseCaseDto } from '@/core/abstractions/application/dtos/use-cases/users/create-user-use-case.dto.abstract';
-import { ICreateUserUseCaseDto } from '@/core/interfaces/application/dtos/use-cases/users/create-user-use-case.dto.interface';
+
+import { CreateUserRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/create-user-repository.dto';
+import { SearchUsersRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/search-users-repository.dto';
+
+import { CreateUserUseCaseDtoSchema } from './schema/use-cases/create-user-use-case.dto.schema';
 import { CreateUserRepositoryDtoSchema } from './schema/repository/create-user-repository.dto.schema';
-import { AbstractCreateUserRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/create-user-repository.dto.abstract';
-import { ICreateUserRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/users/create-user-repository.dto.interface';
 import { ReadUserRepositoryDtoSchema } from './schema/repository/read-user-repository.dto.schema';
 import { UpdateUserRepositoryDtoSchema } from './schema/repository/update-user-repository.dto.schema';
 import { DeleteUserRepositoryDtoSchema } from './schema/repository/delete-user-repository.dto.schema';
 import { SearchUserRepositoryDtoSchema } from './schema/repository/search-users-repository.dto.schema';
-import { CreateUserRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/create-user-repository.dto';
+
+import { z } from 'zod';
+import { Either, Left, left, Right, right } from '@/shared/either';
+
+import { InternalServerError } from '@/core/errors/InternalServerError.error';
+import { UserAlreadyExistsError } from '@/core/errors/application/services/users/user-validation-service/UserAlreadyExistsError.error';
 
 @Injectable()
 export class UserValidationService extends AbstractUserValidationService {

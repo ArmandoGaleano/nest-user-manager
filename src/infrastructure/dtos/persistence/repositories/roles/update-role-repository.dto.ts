@@ -1,6 +1,7 @@
-import { AbstractUpdateRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/roles/update-role-repository.dto.abstract';
-import { IUpdateRoleRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/roles/update-role-repository.dto.interface';
 import { ApiProperty } from '@nestjs/swagger';
+
+import { IUpdateRoleRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/roles/update-role-repository.dto.interface';
+import { AbstractUpdateRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/roles/update-role-repository.dto.abstract';
 
 export class UpdateRoleRepositoryDto extends AbstractUpdateRoleRepositoryDto {
   @ApiProperty({

@@ -1,17 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { Either, Left, left } from '@/shared/either';
-import { AbstractRolesValidationService } from '@/core/abstractions/application/services/roles/roles-validation.service.abstract';
-
-import { InternalServerError } from '@/core/errors/InternalServerError.error';
-
-import { z } from 'zod';
+import { AbstractSearchRoleUseCase } from '@/core/abstractions/application/use-cases/roles/search-role.use-case.abstract';
 
 import { AbstractRolesRepositoryService } from '@/core/abstractions/infrastructure/repositories/roles.repository.service.abstract';
+import { AbstractRolesValidationService } from '@/core/abstractions/application/services/roles/roles-validation.service.abstract';
 
 import { AbstractSearchRolesRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/roles/search-roles-repository.dto.abstract';
-import { SearchRolesRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/roles/search-roles-repository.dto';
 import { AbstractRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/roles/role-repository.dto.abstract';
-import { AbstractSearchRoleUseCase } from '@/core/abstractions/application/use-cases/roles/search-role.use-case.abstract';
+import { SearchRolesRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/roles/search-roles-repository.dto';
+
+import { Either, Left, left } from '@/shared/either';
+import { z } from 'zod';
+import { InternalServerError } from '@/core/errors/InternalServerError.error';
 
 @Injectable()
 export class SearchRoleUseCase extends AbstractSearchRoleUseCase {

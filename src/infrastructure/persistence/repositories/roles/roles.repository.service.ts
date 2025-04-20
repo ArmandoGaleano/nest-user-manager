@@ -1,21 +1,23 @@
 import { Injectable } from '@nestjs/common';
 
-import { Either, Left, left, right } from '@/shared/either';
 import { knex } from '@/infrastructure/persistence/knex';
+import { Either, Left, left, right } from '@/shared/either';
 
 import { ReadRoleRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/roles/read-role-repository.dto';
-import { RoleDto } from '@/infrastructure/dtos/persistence/repositories/roles/role-repository.dto';
 
-import { InternalServerError } from '@/core/errors/InternalServerError.error';
-import { RolesModel } from '../../database-models/roles.model';
 import { AbstractRolesRepositoryService } from '@/core/abstractions/infrastructure/repositories/roles.repository.service.abstract';
+
 import { AbstractCreateRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/roles/create-role-repository.dto.abstract';
-import { AbstractRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/roles/role-repository.dto.abstract';
 import { AbstractReadRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/roles/read-role-repository.dto.abstract';
 import { AbstractUpdateRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/roles/update-role-repository.dto.abstract';
 import { AbstractDeleteRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/roles/delete-role-repository.dto.abstract';
 import { AbstractSearchRolesRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/roles/search-roles-repository.dto.abstract';
+import { AbstractRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/roles/role-repository.dto.abstract';
+import { RoleDto } from '@/infrastructure/dtos/persistence/repositories/roles/role-repository.dto';
 
+import { RolesModel } from '../../database-models/roles.model';
+
+import { InternalServerError } from '@/core/errors/InternalServerError.error';
 @Injectable()
 export class RolesRepositoryService extends AbstractRolesRepositoryService {
   constructor() {

@@ -1,14 +1,16 @@
 import { Injectable } from '@nestjs/common';
 
-import { Either, left, Left, right } from '@/shared/either';
-import { AbstractUserValidationService } from '@/core/abstractions/application/services/users/user-validation.service.abstract';
-import { InternalServerError } from '@/core/errors/InternalServerError.error';
-import { z } from 'zod';
 import { AbstractReadUserUseCase } from '@/core/abstractions/application/use-cases/users/read-user.use-case.abstract';
-import { ReadUserRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/read-user-repository.dto';
-import { AbstractUsersRepositoryService } from '@/core/abstractions/infrastructure/repositories/users.repository.service.abstract';
-import { AbstractReadUserRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/read-user-repository.dto.abstract';
 
+import { AbstractUsersRepositoryService } from '@/core/abstractions/infrastructure/repositories/users.repository.service.abstract';
+import { AbstractUserValidationService } from '@/core/abstractions/application/services/users/user-validation.service.abstract';
+
+import { AbstractReadUserRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/read-user-repository.dto.abstract';
+import { ReadUserRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/read-user-repository.dto';
+
+import { Either, left, Left, right } from '@/shared/either';
+import { z } from 'zod';
+import { InternalServerError } from '@/core/errors/InternalServerError.error';
 @Injectable()
 export class ReadUserUseCase extends AbstractReadUserUseCase {
   constructor(

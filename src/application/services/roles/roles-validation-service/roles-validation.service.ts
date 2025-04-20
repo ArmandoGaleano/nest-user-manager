@@ -1,36 +1,38 @@
+import { Injectable } from '@nestjs/common';
+
 import { AbstractRolesValidationService } from '@/core/abstractions/application/services/roles/roles-validation.service.abstract';
 
-import { Either, Left, left, Right, right } from '@/shared/either';
-import { z } from 'zod';
+import { AbstractRolesRepositoryService } from '@/core/abstractions/infrastructure/repositories/roles.repository.service.abstract';
 
-import { RoleAlreadyExistError } from '@/core/errors/application/services/roles/roles-validation-service/RoleAlreadyExistError.error';
-import { InternalServerError } from '@/core/errors/InternalServerError.error';
-import { RoleNotFoundError } from '@/core/errors/application/services/roles/roles-validation-service/RoleNotFoundError.error';
-
-import { Injectable } from '@nestjs/common';
 import { SearchRolesRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/roles/search-roles-repository.dto';
 
 import { IReadRoleRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/roles/read-role-repository.dto.interface';
-import { ReadRoleRepositoryDtoSchema } from './schema/repository/read-role-repository.dto.schema';
-
 import { IUpdateRoleRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/roles/update-role-repository.dto.interface';
-import { UpdateRoleRepositoryDtoSchema } from './schema/repository/update-role-repository.dto.schema';
-import { DeleteRoleRepositoryDtoSchema } from './schema/repository/delete-role-repository.dto.schema';
-
 import { IDeleteRoleRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/roles/delete-role-repository.dto.interface';
-import { ReadRoleRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/roles/read-role-repository.dto';
+import { ISearchRolesRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/roles/search-roles-repository.dto.interface';
 
-import { CreateRoleRepositoryDtoSchema } from './schema/repository/create-role-repository.dto.schema';
-import { AbstractRolesRepositoryService } from '@/core/abstractions/infrastructure/repositories/roles.repository.service.abstract';
 import { AbstractCreateRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/roles/create-role-repository.dto.abstract';
 import { AbstractReadRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/roles/read-role-repository.dto.abstract';
 import { AbstractUpdateRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/roles/update-role-repository.dto.abstract';
 import { AbstractDeleteRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/roles/delete-role-repository.dto.abstract';
-import { RolesModel } from '@/infrastructure/persistence/database-models/roles.model';
 import { AbstractSearchRolesRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/roles/search-roles-repository.dto.abstract';
-import { ISearchRolesRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/roles/search-roles-repository.dto.interface';
+
+import { ReadRoleRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/roles/read-role-repository.dto';
+
+import { CreateRoleRepositoryDtoSchema } from './schema/repository/create-role-repository.dto.schema';
+import { ReadRoleRepositoryDtoSchema } from './schema/repository/read-role-repository.dto.schema';
+import { UpdateRoleRepositoryDtoSchema } from './schema/repository/update-role-repository.dto.schema';
+import { DeleteRoleRepositoryDtoSchema } from './schema/repository/delete-role-repository.dto.schema';
 import { SearchRoleRepositoryDtoSchema } from './schema/repository/search-role-repository.dto.schema';
 
+import { RolesModel } from '@/infrastructure/persistence/database-models/roles.model';
+
+import { Either, Left, left, right } from '@/shared/either';
+import { z } from 'zod';
+
+import { InternalServerError } from '@/core/errors/InternalServerError.error';
+import { RoleAlreadyExistError } from '@/core/errors/application/services/roles/roles-validation-service/RoleAlreadyExistError.error';
+import { RoleNotFoundError } from '@/core/errors/application/services/roles/roles-validation-service/RoleNotFoundError.error';
 @Injectable()
 export class RolesValidationService extends AbstractRolesValidationService {
   constructor(private RolesRepositoryService: AbstractRolesRepositoryService) {
