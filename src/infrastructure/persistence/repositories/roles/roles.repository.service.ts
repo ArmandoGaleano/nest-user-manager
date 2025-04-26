@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { knex } from '@/infrastructure/persistence/knex';
+import { knex } from '@/infrastructure/persistence/knex/knex';
 import { Either, Left, left, right } from '@/shared/either';
 
 import { ReadRoleRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/roles/read-role-repository.dto';

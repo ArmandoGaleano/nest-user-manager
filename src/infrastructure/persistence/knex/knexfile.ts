@@ -1,6 +1,25 @@
 import type { Knex } from 'knex';
 
 const config: { [key: string]: Knex.Config } = {
+  test: {
+    client: 'postgresql',
+    connection: {
+      host: 'localhost',
+      database: process?.env?.POSTGRES_DB ?? 'postgres_db',
+      user: process?.env?.POSTGRES_USER ?? 'root',
+      password: process?.env?.POSTGRES_PASSWORD ?? 'postgrespassword',
+      port: 5432,
+    },
+    pool: {
+      min: 1,
+      max: 1,
+    },
+    migrations: {
+      tableName: 'knex_migrations',
+      directory: './migrations/production',
+      extension: 'js',
+    },
+  },
   development: {
     client: 'postgresql',
     connection: {
@@ -11,13 +30,13 @@ const config: { [key: string]: Knex.Config } = {
       port: 5432,
     },
     pool: {
-      min: 0,
+      min: 1,
       max: 10,
     },
     migrations: {
       tableName: 'knex_migrations',
       directory: './migrations/development',
-      extension: 'ts',
+      extension: 'js',
     },
   },
 
@@ -31,13 +50,13 @@ const config: { [key: string]: Knex.Config } = {
       port: 5432,
     },
     pool: {
-      min: 0,
-      max: 10,
+      min: 1,
+      max: 1,
     },
     migrations: {
       tableName: 'knex_migrations',
       directory: './migrations/staging',
-      extension: 'ts',
+      extension: 'js',
     },
   },
 
@@ -51,15 +70,15 @@ const config: { [key: string]: Knex.Config } = {
       port: 5432,
     },
     pool: {
-      min: 0,
+      min: 1,
       max: 10,
     },
     migrations: {
       tableName: 'knex_migrations',
       directory: './migrations/production',
-      extension: 'ts',
+      extension: 'js',
     },
   },
 };
 
-module.exports = config;
+export default config;

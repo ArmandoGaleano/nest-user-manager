@@ -1,0 +1,44 @@
+name: nest-user-manager
+
+services:
+  postgres_db:
+    image: postgres:15.10
+    container_name: postgres_db
+    profiles: ["default"]
+    restart: always
+    # set shared memory limit when using docker-compose
+    shm_size: 128mb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    env_file:
+      - .env
+
+    networks:
+      - backend_network
+
+  node_nest_app:
+    container_name: node_nest_app
+    profiles: ["default"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+
+    networks:
+      - frontend_network
+      - backend_network
+
+    depends_on:
+      - postgres_db
+
+networks:
+  frontend_network:
+    driver: bridge
+  backend_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local # Definição do volume mysql_data

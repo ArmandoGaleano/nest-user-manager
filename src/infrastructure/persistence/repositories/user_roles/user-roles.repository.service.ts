@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { knex } from '@/infrastructure/persistence/knex';
+import { knex } from '@/infrastructure/persistence/knex/knex';
 import { Either, left, right } from '@/shared/either';
 
 import { AbstractUserRolesRepositoryService } from '@/core/abstractions/infrastructure/repositories/user-roles.repository.service.abstract';

@@ -1,11 +1,30 @@
-#!/bin/sh
+#!/usr/bin/env sh
+#
+# production.sh —  Aguarda o banco, aplica migrações e inicia a aplicação
+#
+#
 
-# Carrega as variáveis de ambiente do .env, se existir
+set -e
+
+# ─── 0. Definições de caminho ───────────────────────────────────────────────────
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+cd "$PROJECT_ROOT"
+
+# ─── 1. Carregar variáveis de ambiente (.env) ────────────────────────────────────
 if [ -f .env ]; then
-  export $(grep -v '^#' .env | xargs)
+  printf "
+⏳  Carregando variáveis de ambiente de .env...
+"
+  export $(grep -v '^[[:space:]]*#' .env | xargs)
 fi
 
-echo "🔵 Aguardando PostgreSQL ($POSTGRES_HOST:$POSTGRES_PORT) ficar pronto..."
+# ─── 2. Esperar PostgreSQL ──────────────────────────────────────────────────────
+printf "
+🔵  Aguardando PostgreSQL em $POSTGRES_HOST:$POSTGRES_PORT...
+"
+echo "$POSTGRES_HOST"
+echo "$NODE_ENV"
 
 # Loop para testar a conexão com o banco usando pg_isready, passando a senha
 until PGPASSWORD="$POSTGRES_PASSWORD" pg_isready -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "$POSTGRES_USER"; do
@@ -13,18 +32,23 @@ until PGPASSWORD="$POSTGRES_PASSWORD" pg_isready -h "$POSTGRES_HOST" -p "$POSTGR
   sleep 5
 done
 
-echo "🟢 Banco de dados está pronto!"
-echo "🔵 Aplicando migrações..."
 
-yarn knex migrate:latest --knexfile=./dist/knex/knexfile.cjs
+# ─── 3. Aplicar migrations (Knex) ────────────────────────────────────────────────
+printf "
+========================================
+"
+printf "       🔧 Aplicando migrations (Knex)...       
+"
+printf "========================================
+"
+npx knex migrate:latest --knexfile="$PROJECT_ROOT/src/infrastructure/persistence/knex/knexfile.js"
+printf "
+\033[1;32m🟢  Migrations aplicadas com sucesso!\033[0m
+"
 
-if [ $? -ne 0 ]; then
-  echo "🔴 Erro ao aplicar migrações!"
-  exit 1
-fi
-echo "🟢 Migrações aplicadas com sucesso!"
-
+# ─── 5. Iniciar aplicação (NestJS watch) ─────────────────────────────────────────
+printf "
+🚀  Iniciando Servidor...
+"
 cd /nest-user-manager
-echo "🚀 Iniciando a aplicação..."
-npm run nodemon
-
+node ./src/main.js

@@ -1,31 +1,65 @@
-#!/bin/sh
+#!/usr/bin/env sh
+#
+# development.sh — Levanta containers, aguarda o banco, aplica migrações e inicia a aplicação
+#
+#
 
-# Carrega as variáveis de ambiente do .env, se existir
+set -e
+
+# ─── 0. Definições de caminho ───────────────────────────────────────────────────
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+cd "$PROJECT_ROOT"
+
+# ─── 1. Carregar variáveis de ambiente (.env) ────────────────────────────────────
 if [ -f .env ]; then
-  export $(grep -v '^#' .env | xargs)
+  printf "
+⏳  Carregando variáveis de ambiente de .env...
+"
+  export $(grep -v '^[[:space:]]*#' .env | xargs)
 fi
 
-echo "🔵 Aguardando PostgreSQL ($POSTGRES_HOST:$POSTGRES_PORT) ficar pronto..."
-
-# Loop para testar a conexão com o banco usando pg_isready, passando a senha
-until PGPASSWORD="$POSTGRES_PASSWORD" psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT 1" > /dev/null 2>&1; do
-  echo "🔵 Aguardando PostgreSQL ($POSTGRES_HOST:$POSTGRES_PORT/$POSTGRES_DB) ficar pronto..."
-  sleep 5
-done
-
-cd /nest-user-manager
-
-echo "🟢 Banco de dados está pronto!"
-echo "🔵 Aplicando migrações..."
-
-yarn knex migrate:latest --knexfile=./dist/knex/knexfile.cjs
-
-if [ $? -ne 0 ]; then
-  echo "🔴 Erro ao aplicar migrações!"
-  exit 1
+# ─── 2. Ajuste de host para development ──────────────────────────────────────────
+if [ "x$NODE_ENV" = "xdevelopment" ]; then
+  printf "
+🛠️  Ambiente de desenvolvimento detectado. Usando 127.0.0.1 como POSTGRES_HOST...
+"
+  POSTGRES_HOST="127.0.0.1"
+  export POSTGRES_HOST
 fi
-echo "🟢 Migrações aplicadas com sucesso!"
 
-echo "🚀 Iniciando a aplicação..."
+# ─── 4. Subir containers Docker ──────────────────────────────────────────────────
+printf "
+🐳  Iniciando containers Docker em segundo plano...
+"
+docker-compose -f docker-compose.yml -f docker-compose.dev.yml --profile development up --build -d
 
+printf "\033[1;32m✅  Containers iniciados com sucesso!\033[0m
+"
+
+# ─── 5. Esperar PostgreSQL ──────────────────────────────────────────────────────
+printf "
+🔵  Aguardando PostgreSQL em $POSTGRES_HOST:$POSTGRES_PORT...
+"
+node "$PROJECT_ROOT/scripts/utils/wait-for-postgres.mjs"
+printf "\033[1;32m🟢  PostgreSQL está pronto para conexões!\033[0m
+"
+
+# ─── 6. Aplicar migrations (Knex) ────────────────────────────────────────────────
+printf "
+========================================
+"
+printf "       🔧 Aplicando migrations (Knex)...       
+"
+printf "========================================
+"
+npx knex migrate:latest --knexfile="$PROJECT_ROOT/dist/src/infrastructure/persistence/knex/knexfile.js"
+printf "
+\033[1;32m🟢  Migrations aplicadas com sucesso!\033[0m
+"
+
+# ─── 7. Iniciar aplicação (NestJS watch) ─────────────────────────────────────────
+printf "
+🚀  Iniciando NestJS em modo watch...
+"
 npm run start:watch

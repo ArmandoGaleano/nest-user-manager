@@ -11,10 +11,13 @@ RUN apt-get update && apt-get install -y postgresql-client
 WORKDIR /nest-user-manager
 
 # Copia os arquivos da aplicação
-COPY . .
+COPY ./scripts/setup/production.sh ./scripts/setup/production.sh
+COPY ./scripts/utils/wait-for-postgres.mjs ./scripts/utils/wait-for-postgres.mjs
+COPY ./dist .
+COPY ./package.json .
 
 # Instala as dependências da aplicação
-RUN yarn
+RUN npm install --omit=dev
 
 # Permite a execução do script de inicialização
 RUN chmod +x ./scripts/setup/production.sh

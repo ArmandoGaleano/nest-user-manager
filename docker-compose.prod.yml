@@ -2,61 +2,51 @@ name: nest-user-manager
 
 services:
   postgres_db:
-    image: postgres:15.10
-    restart: always
-    # set shared memory limit when using docker-compose
-    shm_size: 128mb
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-    env_file:
-      - .env
-
-    networks:
-      - backend_network
+    profiles: ['development', production']
+    deploy:
+      resources:
+        limits:
+          cpus: ${POSTGRES_CPU_LIMIT}
+          memory: ${POSTGRES_MEM_LIMIT}
+        reservations:
+          cpus: ${POSTGRES_CPU_RESERVE}
+          memory: ${POSTGRES_MEM_RESERVE}
 
     expose:
       - '5432'
 
   node_nest_app:
-    container_name: node_nest_app
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
-    env_file:
-      - .env
-
-    stdin_open: true # Permite que terminal seja interativo
-    tty: true # Mantém o terminal aberto para inputs
-
-    expose:
-      - '3000'
-    networks:
-      - frontend_network
-      - backend_network
-
-    depends_on:
-      - postgres_db
+    profiles: ['development', 'production']
+    stdin_open: ${NODE_STDIN_OPEN:-false}
+    tty: ${NODE_TTY:-false}
     logging:
-      driver: 'json-file'
+      driver: json-file
       options:
         max-size: '10m'
         max-file: '3'
     deploy:
       resources:
         limits:
-          cpus: '0.75' # Máximo de 75% de 1 CPU
-          memory: 512M # Limita o uso de memória a 512 MB
+          cpus: ${NODE_CPU_LIMIT}
+          memory: ${NODE_MEM_LIMIT}
         reservations:
-          cpus: '0.5' # Reserva 50% de 1 CPU
-          memory: 256M # Reserva 256 MB de memória
+          cpus: ${NODE_CPU_RESERVE}
+          memory: ${NODE_MEM_RESERVE}
+    expose: 
+      - '3000'
 
   nginx_service:
     image: nginx:1.27.3
     container_name: nginx_service
+    profiles: ['development', 'production']
+    restart: always
+    env_file:
+      - .env
+
     volumes:
-      - ./docker/nginx/nginx.dev.conf:/etc/nginx/conf.d/nginx.dev.conf # Configuração do NGINX
-      - ./docker/nginx/certs:/etc/nginx/certs # Certificados SSL
+      - ./docker/nginx/nginx.${NODE_ENV:-development}.conf:/etc/nginx/conf.d/nginx.dev.conf # Configuração do NGINX
+      - ./docker/nginx/certs:/etc/nginx/dev/certs # Certificados SSL de desenvolvimento
+      - certs-production:/etc/nginx/certs # Certificados SSL de produção
     ports:
       - '443:443' # HTTPS
       - '80:80' # HTTP para redirecionamento
@@ -65,19 +55,34 @@ services:
       - node_nest_app
     networks:
       - frontend_network
-    logging:
-      driver: 'json-file'
-      options:
-        max-size: '10m'
-        max-file: '3'
     deploy:
       resources:
         limits:
-          cpus: '0.5' # Máximo de 50% de 1 CPU
-          memory: 256M # Limita o uso de memória a 256 MB
+          cpus: '1.0'
+          memory: 1G
         reservations:
-          cpus: '0.25' # Reserva 25% de 1 CPU
-          memory: 128M # Reserva 128 MB de memória
+          cpus: '0.5'
+          memory: 512M
+  certbot:
+    image: certbot/certbot:latest
+    profiles: ['production']
+    container_name: certbot
+    volumes:
+      - certs-production:/etc/letsencrypt
+      - certbot-var:/var/lib/letsencrypt
+      - ./docker/nginx/letsencrypt:/var/www/letsencrypt
+    command: >
+      sh -c "certbot certonly --webroot \
+        --webroot-path=/var/www/letsencrypt \
+        --email ${LETSENCRYPT_EMAIL} \
+        --agree-tos \
+        --no-eff-email \
+        -d ${DOMAIN} && crond -f"
+    networks:
+      - frontend_network
+    environment:
+      DOMAIN: ${DOMAIN}
+      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
 
 networks:
   frontend_network:
@@ -88,3 +93,5 @@ networks:
 volumes:
   postgres_data:
     driver: local # Definição do volume mysql_data
+  certs-production:
+  certbot-var:

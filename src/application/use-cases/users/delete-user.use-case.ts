@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { knex } from 'src/infrastructure/persistence/knex';
+import { knex } from '@/infrastructure/persistence/knex/knex';
 
 import { AbstractDeleteUserUseCase } from '@/core/abstractions/application/use-cases/users/delete-user.use-case.abstract';
 import { Either, left, Left, right } from '@/shared/either';

@@ -2,96 +2,10 @@ name: nest-user-manager
 
 services:
   postgres_db:
-    image: postgres:15.10
-    restart: always
-    # set shared memory limit when using docker-compose
-    shm_size: 128mb
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-    env_file:
-      - .env
-
+    profiles: ["development"]
     networks:
       backend_network:
         aliases:
           - postgres_db
-
-    expose:
-      - '5432'
-
-  node_nest_app:
-    container_name: node_nest_app
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
-    env_file:
-      - .env
-
-    stdin_open: true # Permite que terminal seja interativo
-    tty: true # Mantém o terminal aberto para inputs
-
-    volumes:
-      - ./src:/nest-user-manager/src
-
-    expose:
-      - '3000'
-    networks:
-      frontend_network:
-        aliases:
-          - node_nest_app
-      backend_network:
-
-    depends_on:
-      - postgres_db
-    logging:
-      driver: 'json-file'
-      options:
-        max-size: '10m'
-        max-file: '3'
-    deploy:
-      resources:
-        limits:
-          cpus: '0.75' # Máximo de 75% de 1 CPU
-          memory: 512M # Limita o uso de memória a 512 MB
-        reservations:
-          cpus: '0.5' # Reserva 50% de 1 CPU
-          memory: 256M # Reserva 256 MB de memória
-
-  nginx_service:
-    image: nginx:1.27.3
-    container_name: nginx_service
-    volumes:
-      - ./docker/nginx/nginx.dev.conf:/etc/nginx/conf.d/nginx.dev.conf # Configuração do NGINX
-      - ./docker/nginx/certs:/etc/nginx/certs # Certificados SSL
     ports:
-      - '443:443' # HTTPS
-      - '80:80' # HTTP para redirecionamento
-    depends_on:
-      - postgres_db
-      - node_nest_app
-    networks:
-      - frontend_network
-    logging:
-      driver: 'json-file'
-      options:
-        max-size: '10m'
-        max-file: '3'
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5' # Máximo de 50% de 1 CPU
-          memory: 256M # Limita o uso de memória a 256 MB
-        reservations:
-          cpus: '0.25' # Reserva 25% de 1 CPU
-          memory: 128M # Reserva 128 MB de memória
-
-networks:
-  frontend_network:
-    driver: bridge
-  backend_network:
-    driver: bridge
-
-volumes:
-  postgres_data:
-    driver: local # Definição do volume mysql_data
+      - '5432:5432'

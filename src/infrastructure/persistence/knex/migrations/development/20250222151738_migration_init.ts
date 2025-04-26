@@ -1,5 +1,5 @@
 import { Knex } from 'knex';
-import { RolesModel } from '../../database-models/roles.model';
+import { RolesModel } from '../../../database-models/roles.model';
 
 type RoleModelKeys = keyof RolesModel;
 type UserModelKeys = keyof UsersModel;
