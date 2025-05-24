@@ -1,35 +1,29 @@
 import { Injectable } from '@nestjs/common';
-
 import { knex } from '@/infrastructure/persistence/knex/knex';
-import { Either, left, right } from '@/shared/either';
 
-import { AbstractUsersRepositoryService } from '@/core/abstractions/infrastructure/repositories/users.repository.service.abstract';
-import { AbstractCreateUserRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/create-user-repository.dto.abstract';
-import { AbstractReadUserRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/read-user-repository.dto.abstract';
-import { AbstractUpdateUserRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/update-user-repository.dto.abstract';
-import { AbstractDeleteUserRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/delete-user-repository.dto.abstract';
-import { AbstractSearchUsersRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/search-users-repository.dto.abstract';
-import { AbstractSearchUsersRepositoryResultDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/search-users-repository-result.dto.abstract';
-import { AbstractUserRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/user-repository.dto.abstract';
 import { UserRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/user-repository.dto';
+import { CreateUserRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/create-user-repository.dto';
+import { ReadUserRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/read-user-repository.dto';
+import { UpdateUserRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/update-user-repository.dto';
+import { DeleteUserRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/delete-user-repository.dto';
+import { SearchUsersRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/search-users-repository.dto';
 import { SearchUsersRepositoryResultDto } from '@/infrastructure/dtos/persistence/repositories/users/search-users-repository-result.dto';
 
 import { InternalServerError } from '@/core/errors/InternalServerError.error';
 import { CreateUserRepositoryError } from '@/core/errors/repositories/users/CreateUserRepositoryError.error';
 import { UpdateUserRepositoryError } from '@/core/errors/repositories/users/UpdateUserRepositoryError.error';
+
+import { Either, left, right } from '@/shared/either';
+import { IUsersRepositoryService } from '@/core/interfaces/infrastructure/repositories/user.repository.service.interface';
+import { UsersModel } from '../../database-models/users.model';
 @Injectable()
-export class UsersRepositoryService extends AbstractUsersRepositoryService {
-  constructor() {
-    super();
-  }
+export class UsersRepositoryService implements IUsersRepositoryService {
+  constructor() {}
 
   public async createUser(
-    dto: AbstractCreateUserRepositoryDto,
+    dto: CreateUserRepositoryDto,
   ): Promise<
-    Either<
-      InternalServerError | CreateUserRepositoryError,
-      AbstractUserRepositoryDto
-    >
+    Either<InternalServerError | CreateUserRepositoryError, UserRepositoryDto>
   > {
     try {
       const user = await knex<UsersModel>('users')
@@ -60,10 +54,8 @@ export class UsersRepositoryService extends AbstractUsersRepositoryService {
     }
   }
   public async readUser(
-    dto: AbstractReadUserRepositoryDto,
-  ): Promise<
-    Either<InternalServerError, AbstractUserRepositoryDto | undefined>
-  > {
+    dto: ReadUserRepositoryDto,
+  ): Promise<Either<InternalServerError, UserRepositoryDto | undefined>> {
     try {
       const query = knex<UsersModel>('users');
 
@@ -90,12 +82,9 @@ export class UsersRepositoryService extends AbstractUsersRepositoryService {
     }
   }
   public async updateUser(
-    dto: AbstractUpdateUserRepositoryDto,
+    dto: UpdateUserRepositoryDto,
   ): Promise<
-    Either<
-      InternalServerError | UpdateUserRepositoryError,
-      AbstractUserRepositoryDto
-    >
+    Either<InternalServerError | UpdateUserRepositoryError, UserRepositoryDto>
   > {
     try {
       const user = await knex<UsersModel>('users')
@@ -125,7 +114,7 @@ export class UsersRepositoryService extends AbstractUsersRepositoryService {
   }
 
   public async deleteUser(
-    dto: AbstractDeleteUserRepositoryDto,
+    dto: DeleteUserRepositoryDto,
   ): Promise<Either<InternalServerError, boolean>> {
     try {
       const deleteSuccess = !!(await knex<UsersModel>('users')
@@ -142,10 +131,8 @@ export class UsersRepositoryService extends AbstractUsersRepositoryService {
   }
 
   public async searchUsers(
-    dto: AbstractSearchUsersRepositoryDto,
-  ): Promise<
-    Either<InternalServerError, AbstractSearchUsersRepositoryResultDto>
-  > {
+    dto: SearchUsersRepositoryDto,
+  ): Promise<Either<InternalServerError, SearchUsersRepositoryResultDto>> {
     try {
       const limit = dto.limit ? Math.min(dto.limit, 100) : 10;
       const page = dto.page && dto.page > 0 ? dto.page : 1;
@@ -212,10 +199,14 @@ export class UsersRepositoryService extends AbstractUsersRepositoryService {
         query.where('users.updatedAt', '<=', dto.updatedAtEnd);
       }
       // Filtro por roles, se informado
-      if (dto.roles && Array.isArray(dto.roles) && dto.roles.length > 0) {
+      if (
+        dto.roleNames &&
+        Array.isArray(dto.roleNames) &&
+        dto.roleNames.length > 0
+      ) {
         const rolesSubquery = knex('roles')
           .select('id')
-          .whereIn('name', dto.roles);
+          .whereIn('name', dto.roleNames);
         const userRolesSubquery = knex('user_roles')
           .select('user_id')
           .whereIn('role_id', rolesSubquery);

@@ -1,9 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import { AbstractDeleteUserRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/delete-user-repository.dto.abstract';
 import { IDeleteUserRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/users/delete-user-repository.dto.interface';
+import { AbstractAutoSerializableClass } from '@/core/abstractions/@base/auto-serializable-class.abstract';
 
-export class DeleteUserRepositoryDto extends AbstractDeleteUserRepositoryDto {
+export class DeleteUserRepositoryDto
+  extends AbstractAutoSerializableClass<IDeleteUserRepositoryDto>
+  implements IDeleteUserRepositoryDto
+{
   @ApiProperty({
     type: 'string',
     description: 'User uuid',

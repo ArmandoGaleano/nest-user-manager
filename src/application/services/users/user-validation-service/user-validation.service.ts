@@ -1,24 +1,5 @@
 import { Injectable } from '@nestjs/common';
-
-import { AbstractUserValidationService } from '@/core/abstractions/application/services/users/user-validation.service.abstract';
-
-import { AbstractUsersRepositoryService } from '@/core/abstractions/infrastructure/repositories/users.repository.service.abstract';
-
-import { ICreateUserUseCaseDto } from '@/core/interfaces/application/dtos/use-cases/users/create-user-use-case.dto.interface';
-import { ICreateUserRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/users/create-user-repository.dto.interface';
-import { IReadUserRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/users/read-user-repository.dto.interface';
-import { IUpdateUserRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/users/update-user-repository.dto.interface';
-import { IDeleteUserRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/users/delete-user-repository.dto.interface';
-import { ISearchUsersRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/users/search-users-repository.dto.interface';
-
-import { AbstractCreateUserUseCaseDto } from '@/core/abstractions/application/dtos/use-cases/users/create-user-use-case.dto.abstract';
-import { AbstractCreateUserRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/create-user-repository.dto.abstract';
-import { AbstractReadUserRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/read-user-repository.dto.abstract';
-import { AbstractUpdateUserRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/update-user-repository.dto.abstract';
-import { AbstractDeleteUserRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/delete-user-repository.dto.abstract';
-import { AbstractSearchUsersRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/search-users-repository.dto.abstract';
-import { AbstractSearchUsersRepositoryResultDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/search-users-repository-result.dto.abstract';
-
+import { IUserValidationService } from '@/core/interfaces/application/services/users/user-validation.service.interface';
 import { CreateUserRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/create-user-repository.dto';
 import { SearchUsersRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/search-users-repository.dto';
 
@@ -29,23 +10,34 @@ import { UpdateUserRepositoryDtoSchema } from './schema/repository/update-user-r
 import { DeleteUserRepositoryDtoSchema } from './schema/repository/delete-user-repository.dto.schema';
 import { SearchUserRepositoryDtoSchema } from './schema/repository/search-users-repository.dto.schema';
 
+import { ICreateUserRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/users/create-user-repository.dto.interface';
+import { IReadUserRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/users/read-user-repository.dto.interface';
+import { IUpdateUserRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/users/update-user-repository.dto.interface';
+import { IDeleteUserRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/users/delete-user-repository.dto.interface';
+import { ISearchUsersRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/users/search-users-repository.dto.interface';
+import { ICreateUserUseCaseDto } from '@/core/interfaces/application/dtos/use-cases/users/create-user-use-case.dto.interface';
+
 import { z } from 'zod';
 import { Either, Left, left, Right, right } from '@/shared/either';
 
 import { InternalServerError } from '@/core/errors/InternalServerError.error';
 import { UserAlreadyExistsError } from '@/core/errors/application/services/users/user-validation-service/UserAlreadyExistsError.error';
+import { AbstractValidationService } from '@/core/abstractions/@base/validation-service.abstract';
+import { UsersRepositoryService } from '@/infrastructure/persistence/repositories/users/user.repository.service';
+import { UpdateUserRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/update-user-repository.dto';
+import { SearchUsersRepositoryResultDto } from '@/infrastructure/dtos/persistence/repositories/users/search-users-repository-result.dto';
+import { UsersModel } from '@/infrastructure/persistence/database-models/users.model';
 
 @Injectable()
-export class UserValidationService extends AbstractUserValidationService {
-  constructor(
-    private readonly UserRepositoryService: AbstractUsersRepositoryService,
-  ) {
+export class UserValidationService
+  extends AbstractValidationService
+  implements IUserValidationService
+{
+  constructor(private readonly UserRepositoryService: UsersRepositoryService) {
     super();
   }
 
-  public validateCreateUserUseCaseSchema(
-    dto: AbstractCreateUserUseCaseDto,
-  ): Either<
+  public validateCreateUserUseCaseSchema(dto: ICreateUserUseCaseDto): Either<
     | z.ZodError<{
         [x: string]: any;
       }>
@@ -60,7 +52,7 @@ export class UserValidationService extends AbstractUserValidationService {
   }
 
   public validateCreateUserRepositorySchema(
-    dto: AbstractCreateUserRepositoryDto,
+    dto: ICreateUserRepositoryDto,
   ): Either<
     | z.ZodError<{
         [x: string]: any;
@@ -75,7 +67,7 @@ export class UserValidationService extends AbstractUserValidationService {
     });
   }
 
-  public validateReadUserSchema(dto: AbstractReadUserRepositoryDto): Either<
+  public validateReadUserSchema(dto: IReadUserRepositoryDto): Either<
     | z.ZodError<{
         [x: string]: any;
       }>
@@ -89,7 +81,7 @@ export class UserValidationService extends AbstractUserValidationService {
     });
   }
 
-  public validateUpdateUserSchema(dto: AbstractUpdateUserRepositoryDto): Either<
+  public validateUpdateUserSchema(dto: IUpdateUserRepositoryDto): Either<
     | z.ZodError<{
         [x: string]: any;
       }>
@@ -103,7 +95,7 @@ export class UserValidationService extends AbstractUserValidationService {
     });
   }
 
-  public validateDeleteUserSchema(dto: AbstractDeleteUserRepositoryDto): Either<
+  public validateDeleteUserSchema(dto: IDeleteUserRepositoryDto): Either<
     | z.ZodError<{
         [x: string]: any;
       }>
@@ -117,9 +109,7 @@ export class UserValidationService extends AbstractUserValidationService {
     });
   }
 
-  public validateSearchUsersSchema(
-    dto: AbstractSearchUsersRepositoryDto,
-  ): Either<
+  public validateSearchUsersSchema(dto: ISearchUsersRepositoryDto): Either<
     | z.ZodError<{
         [x: string]: any;
       }>
@@ -133,16 +123,14 @@ export class UserValidationService extends AbstractUserValidationService {
     });
   }
 
-  public async validateCreateUser(
-    dto: AbstractCreateUserRepositoryDto,
-  ): Promise<
+  public async validateCreateUser(dto: ICreateUserRepositoryDto): Promise<
     Either<
       | z.ZodError<{
           [x: string]: any;
         }>
       | InternalServerError
       | UserAlreadyExistsError,
-      AbstractCreateUserRepositoryDto
+      CreateUserRepositoryDto
     >
   > {
     const validator = this.validateCreateUserRepositorySchema(dto);
@@ -169,16 +157,14 @@ export class UserValidationService extends AbstractUserValidationService {
     return right(new CreateUserRepositoryDto(validator.value));
   }
 
-  public async validateUpdateUser(
-    dto: AbstractUpdateUserRepositoryDto,
-  ): Promise<
+  public async validateUpdateUser(dto: IUpdateUserRepositoryDto): Promise<
     Either<
       | z.ZodError<{
           [x: string]: any;
         }>
       | InternalServerError
       | UserAlreadyExistsError,
-      IUpdateUserRepositoryDto
+      UpdateUserRepositoryDto
     >
   > {
     const validator = this.validateUpdateUserSchema(dto);
@@ -202,7 +188,7 @@ export class UserValidationService extends AbstractUserValidationService {
       }
     }
 
-    return right(validator.value);
+    return right(new UpdateUserRepositoryDto(validator.value));
   }
 
   public async isUserRegistered({
@@ -216,9 +202,7 @@ export class UserValidationService extends AbstractUserValidationService {
   >): Promise<Either<InternalServerError, boolean>> {
     try {
       const eitherListSearchByExistentAccountPromises: Array<
-        Promise<
-          Either<InternalServerError, AbstractSearchUsersRepositoryResultDto>
-        >
+        Promise<Either<InternalServerError, SearchUsersRepositoryResultDto>>
       > = [];
 
       if (id) {
@@ -262,7 +246,7 @@ export class UserValidationService extends AbstractUserValidationService {
       }
 
       const hasExistentAccount = eitherListSearchByExistentAccount.some(
-        (rightData: Right<AbstractSearchUsersRepositoryResultDto>) =>
+        (rightData: Right<SearchUsersRepositoryResultDto>) =>
           rightData.value.data.length > 0,
       );
 

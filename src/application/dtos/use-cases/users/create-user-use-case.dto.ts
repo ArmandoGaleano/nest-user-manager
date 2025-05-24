@@ -1,8 +1,11 @@
-import { AbstractCreateUserUseCaseDto } from '@/core/abstractions/application/dtos/use-cases/users/create-user-use-case.dto.abstract';
-import { ICreateUserUseCaseDto } from '@/core/interfaces/application/dtos/use-cases/users/create-user-use-case.dto.interface';
 import { ApiProperty } from '@nestjs/swagger';
+import { ICreateUserUseCaseDto } from '@/core/interfaces/application/dtos/use-cases/users/create-user-use-case.dto.interface';
+import { AbstractAutoSerializableClass } from '@/core/abstractions/@base/auto-serializable-class.abstract';
 
-export class CreateUserUseCaseDto extends AbstractCreateUserUseCaseDto {
+export class CreateUserUseCaseDto
+  extends AbstractAutoSerializableClass<ICreateUserUseCaseDto>
+  implements ICreateUserUseCaseDto
+{
   @ApiProperty({
     type: 'string',
     format: 'email',
@@ -74,11 +77,11 @@ export class CreateUserUseCaseDto extends AbstractCreateUserUseCaseDto {
     items: {
       type: 'string',
     },
-    description: 'User roles',
-    example: ['role1', 'role2'],
+    description: 'Role uuid list',
+    example: ['6a4a980c-af44-4368-a549-b0829920ea35'],
   })
-  get roles() {
-    return this._dto.roles;
+  get roleNames() {
+    return this._dto.roleNames;
   }
 
   constructor(private _dto: ICreateUserUseCaseDto) {

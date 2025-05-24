@@ -3,25 +3,24 @@ import { Injectable } from '@nestjs/common';
 import { knex } from '@/infrastructure/persistence/knex/knex';
 import { Either, left, right } from '@/shared/either';
 
-import { AbstractUserRolesRepositoryService } from '@/core/abstractions/infrastructure/repositories/user-roles.repository.service.abstract';
-import { AbstractCreateUserRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/user-roles/create-user-role.dto.abstract';
-import { AbstractSearchUserRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/user-roles/search-user-role.dto.abstract';
-import { AbstractDeleteUserRoleUseCaseDto } from '@/core/abstractions/application/dtos/use-cases/user-roles/delete-user-role.use-case.dto.abstract';
-import { AbstractUserRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/user-roles/user-role-repository.dto.abstract';
 import { UserRoleRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/user-roles/user-role-repository.dto';
 
 import { UserRolesModel } from '../../database-models/user_roles.model';
 
 import { InternalServerError } from '@/core/errors/InternalServerError.error';
+import { IUserRolesRepositoryService } from '@/core/interfaces/infrastructure/repositories/user-roles.repository.service.interface';
+import { IUserRoleRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/user-roles/user-role-repository.dto.interface';
+
+import { SearchUserRoleRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/user-roles/search-user-role-repository.dto';
+import { DeleteUserRoleUseCaseDto } from '@/application/dtos/use-cases/user-roles/delete-user-role.use-case.dto';
+import { CreateUserRoleRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/user-roles/create-user-role-repository.dto';
 @Injectable()
-export class UserRolesRepositoryService extends AbstractUserRolesRepositoryService {
-  constructor() {
-    super();
-  }
+export class UserRolesRepositoryService implements IUserRolesRepositoryService {
+  constructor() {}
 
   public async createUserRole(
-    dto: AbstractCreateUserRoleRepositoryDto,
-  ): Promise<Either<InternalServerError, AbstractUserRoleRepositoryDto>> {
+    dto: CreateUserRoleRepositoryDto,
+  ): Promise<Either<InternalServerError, IUserRoleRepositoryDto>> {
     try {
       const userRole = await knex<UserRolesModel>('user_roles')
         .insert({
@@ -46,7 +45,7 @@ export class UserRolesRepositoryService extends AbstractUserRolesRepositoryServi
   }
 
   public async deleteUserRole(
-    dto: AbstractDeleteUserRoleUseCaseDto,
+    dto: DeleteUserRoleUseCaseDto,
   ): Promise<Either<InternalServerError, boolean>> {
     try {
       const userRoleDeleted = await knex<UserRolesModel>('user_roles')
@@ -66,8 +65,8 @@ export class UserRolesRepositoryService extends AbstractUserRolesRepositoryServi
   }
 
   public async searchUserRole(
-    dto: AbstractSearchUserRoleRepositoryDto,
-  ): Promise<Either<InternalServerError, AbstractUserRoleRepositoryDto[]>> {
+    dto: SearchUserRoleRepositoryDto,
+  ): Promise<Either<InternalServerError, IUserRoleRepositoryDto[]>> {
     try {
       const limit = dto.limit ? Math.min(dto.limit, 100) : 10;
       const page = dto.page && dto.page > 0 ? dto.page : 1;

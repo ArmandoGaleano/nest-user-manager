@@ -1,37 +1,33 @@
 import { Injectable } from '@nestjs/common';
 
-import { AbstractReadUserUseCase } from '@/core/abstractions/application/use-cases/users/read-user.use-case.abstract';
-
-import { AbstractUsersRepositoryService } from '@/core/abstractions/infrastructure/repositories/users.repository.service.abstract';
-import { AbstractUserValidationService } from '@/core/abstractions/application/services/users/user-validation.service.abstract';
-
-import { AbstractReadUserRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/read-user-repository.dto.abstract';
 import { ReadUserRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/read-user-repository.dto';
 
 import { Either, left, Left, right } from '@/shared/either';
 import { z } from 'zod';
 import { InternalServerError } from '@/core/errors/InternalServerError.error';
+import { UsersRepositoryService } from '@/infrastructure/persistence/repositories/users/user.repository.service';
+import { UserValidationService } from '@/application/services/users/user-validation-service/user-validation.service';
+import { IReadUserUseCase } from '@/core/interfaces/application/use-cases/users/read-user-use-case.interface';
+import { UserRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/user-repository.dto';
 @Injectable()
-export class ReadUserUseCase extends AbstractReadUserUseCase {
+export class ReadUserUseCase implements IReadUserUseCase {
   constructor(
-    private readonly UsersRepositoryService: AbstractUsersRepositoryService,
-    private readonly UserValidationService: AbstractUserValidationService,
-  ) {
-    super();
-  }
+    private readonly usersRepositoryService: UsersRepositoryService,
+    private readonly userValidationService: UserValidationService,
+  ) {}
 
-  public async execute(dto: AbstractReadUserRepositoryDto): Promise<
+  public async execute(dto: ReadUserRepositoryDto): Promise<
     Either<
       | z.ZodError<{
           [x: string]: any;
         }>
       | InternalServerError,
-      any
+      UserRepositoryDto | undefined
     >
   > {
     try {
       const eitherValidateReadUserSchema =
-        this.UserValidationService.validateReadUserSchema(dto);
+        this.userValidationService.validateReadUserSchema(dto);
 
       if (eitherValidateReadUserSchema instanceof Left) {
         return eitherValidateReadUserSchema;
@@ -39,7 +35,7 @@ export class ReadUserUseCase extends AbstractReadUserUseCase {
 
       const validatedReadUserDto = eitherValidateReadUserSchema.value;
 
-      const eitherReadUser = await this.UsersRepositoryService.readUser(
+      const eitherReadUser = await this.usersRepositoryService.readUser(
         new ReadUserRepositoryDto(validatedReadUserDto),
       );
 
@@ -49,7 +45,7 @@ export class ReadUserUseCase extends AbstractReadUserUseCase {
 
       const readUser = eitherReadUser.value;
 
-      return right(readUser?.toObject());
+      return right(readUser);
     } catch (error) {
       console.error('Error on ReadUserUseCase');
       console.error(error);

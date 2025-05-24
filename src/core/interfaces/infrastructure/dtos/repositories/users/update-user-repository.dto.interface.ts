@@ -1,3 +1,5 @@
+import { UsersModel } from '@/infrastructure/persistence/database-models/users.model';
+
 export interface IUpdateUserRepositoryDto {
   id: UsersModel['id'];
   password?: UsersModel['password'];

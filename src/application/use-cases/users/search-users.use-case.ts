@@ -1,45 +1,40 @@
 import { Injectable } from '@nestjs/common';
 
-import { AbstractSearchUsersUseCase } from '@/core/abstractions/application/use-cases/users/search-users.use-case.abstract';
-
-import { AbstractUsersRepositoryService } from '@/core/abstractions/infrastructure/repositories/users.repository.service.abstract';
-import { AbstractUserValidationService } from '@/core/abstractions/application/services/users/user-validation.service.abstract';
-
-import { AbstractSearchUsersRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/search-users-repository.dto.abstract';
-import { AbstractSearchUsersRepositoryResultDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/search-users-repository-result.dto.abstract';
 import { SearchUsersRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/search-users-repository.dto';
 
 import { Either, left, Left, right } from '@/shared/either';
 import { z } from 'zod';
 
 import { InternalServerError } from '@/core/errors/InternalServerError.error';
+import { UsersRepositoryService } from '@/infrastructure/persistence/repositories/users/user.repository.service';
+import { UserValidationService } from '@/application/services/users/user-validation-service/user-validation.service';
+import { SearchUsersRepositoryResultDto } from '@/infrastructure/dtos/persistence/repositories/users/search-users-repository-result.dto';
+import { ISearchUsersUseCase } from '@/core/interfaces/application/use-cases/users/search-users.use-case.interface';
 @Injectable()
-export class SearchUsersUseCase extends AbstractSearchUsersUseCase {
+export class SearchUsersUseCase implements ISearchUsersUseCase {
   constructor(
-    private readonly UsersRepositoryService: AbstractUsersRepositoryService,
-    private readonly UserValidationService: AbstractUserValidationService,
-  ) {
-    super();
-  }
+    private readonly usersRepositoryService: UsersRepositoryService,
+    private readonly userValidationService: UserValidationService,
+  ) {}
 
-  async execute(dto: AbstractSearchUsersRepositoryDto): Promise<
+  async execute(dto: SearchUsersRepositoryDto): Promise<
     Either<
       | z.ZodError<{
           [x: string]: any;
         }>
       | InternalServerError,
-      AbstractSearchUsersRepositoryResultDto
+      SearchUsersRepositoryResultDto
     >
   > {
     try {
       const eitherValidateSearchUsersResult =
-        this.UserValidationService.validateSearchUsersSchema(dto);
+        this.userValidationService.validateSearchUsersSchema(dto);
 
       if (eitherValidateSearchUsersResult instanceof Left) {
         return eitherValidateSearchUsersResult;
       }
 
-      const eitherSearchUsers = await this.UsersRepositoryService.searchUsers(
+      const eitherSearchUsers = await this.usersRepositoryService.searchUsers(
         new SearchUsersRepositoryDto(eitherValidateSearchUsersResult.value),
       );
 

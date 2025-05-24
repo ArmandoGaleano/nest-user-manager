@@ -1,18 +1,9 @@
 import { Injectable } from '@nestjs/common';
 
-import { AbstractUserRolesValidationService } from '@/core/abstractions/application/services/user-roles/user-roles-validation.service.abstract';
-
-import { AbstractUserRolesRepositoryService } from '@/core/abstractions/infrastructure/repositories/user-roles.repository.service.abstract';
-
 import { ICreateUserRoleUseCaseDto } from '@/core/interfaces/application/dtos/use-cases/user-roles/create-user-role-use-case.dto.interface';
 import { ICreateUserRoleRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/user-roles/create-user-role-repository.dto.interface';
 import { IDeleteUserRoleRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/user-roles/delete-user-role-repository.dto.interface';
 import { ISearchUserRoleRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/user-roles/search-user-role-repository.dto.interface';
-
-import { AbstractCreateUserRoleUseCaseDto } from '@/core/abstractions/application/dtos/use-cases/user-roles/create-user-role-use-case.dto.abstract';
-import { AbstractCreateUserRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/user-roles/create-user-role.dto.abstract';
-import { AbstractDeleteUserRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/user-roles/delete-user-role.dto.abstract';
-import { AbstractSearchUserRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/user-roles/search-user-role.dto.abstract';
 
 import { SearchUserRoleRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/user-roles/search-user-role-repository.dto';
 
@@ -27,17 +18,21 @@ import { Either, Left, left, right } from '@/shared/either';
 import { z } from 'zod';
 
 import { InternalServerError } from '@/core/errors/InternalServerError.error';
+import { IUserRolesValidationService } from '@/core/interfaces/application/services/user-roles/user-roles-validation.service.interface';
+import { UserRolesRepositoryService } from '@/infrastructure/persistence/repositories/user_roles/user-roles.repository.service';
+import { AbstractValidationService } from '@/core/abstractions/@base/validation-service.abstract';
 @Injectable()
-export class UserRolesValidationService extends AbstractUserRolesValidationService {
+export class UserRolesValidationService
+  extends AbstractValidationService
+  implements IUserRolesValidationService
+{
   constructor(
-    private readonly UserRolesRepositoryService: AbstractUserRolesRepositoryService,
+    private readonly userRolesRepositoryService: UserRolesRepositoryService,
   ) {
     super();
   }
 
-  validateCreateUserRoleUseCaseDto(
-    dto: AbstractCreateUserRoleUseCaseDto,
-  ): Either<
+  validateCreateUserRoleUseCaseDto(dto: ICreateUserRoleUseCaseDto): Either<
     | InternalServerError
     | z.ZodError<{
         [x: string]: any;
@@ -52,7 +47,7 @@ export class UserRolesValidationService extends AbstractUserRolesValidationServi
   }
 
   validateCreateUserRoleRepositorySchema(
-    dto: AbstractCreateUserRoleRepositoryDto,
+    dto: ICreateUserRoleRepositoryDto,
   ): Either<
     | InternalServerError
     | z.ZodError<{
@@ -68,7 +63,7 @@ export class UserRolesValidationService extends AbstractUserRolesValidationServi
   }
 
   validateDeleteUserRoleRepositorySchema(
-    dto: AbstractDeleteUserRoleRepositoryDto,
+    dto: IDeleteUserRoleRepositoryDto,
   ): Either<
     | InternalServerError
     | z.ZodError<{
@@ -84,7 +79,7 @@ export class UserRolesValidationService extends AbstractUserRolesValidationServi
   }
 
   validateSearchUserRoleRepositoryDtoSchema(
-    dot: AbstractSearchUserRoleRepositoryDto,
+    dot: ISearchUserRoleRepositoryDto,
   ): Either<
     | InternalServerError
     | z.ZodError<{
@@ -130,7 +125,7 @@ export class UserRolesValidationService extends AbstractUserRolesValidationServi
       const userRoleExistsPromises = userRoles.map(
         async ({ user_id, role_id }) => {
           const eitherSearchUserRole =
-            await this.UserRolesRepositoryService.searchUserRole(
+            await this.userRolesRepositoryService.searchUserRole(
               new SearchUserRoleRepositoryDto({
                 user_id,
                 role_id,

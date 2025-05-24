@@ -1,9 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 import { IRoleRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/roles/role-repository.dto.interface';
-import { AbstractRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/roles/role-repository.dto.abstract';
+import { AbstractAutoSerializableClass } from '@/core/abstractions/@base/auto-serializable-class.abstract';
 
-export class RoleDto extends AbstractRoleRepositoryDto {
+export class RoleRepositoryDto
+  extends AbstractAutoSerializableClass<IRoleRepositoryDto>
+  implements IRoleRepositoryDto
+{
   @ApiProperty({
     type: 'string',
     description: 'Role uuid',

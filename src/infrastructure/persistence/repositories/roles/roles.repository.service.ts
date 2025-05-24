@@ -1,61 +1,22 @@
 import { Injectable } from '@nestjs/common';
-
 import { knex } from '@/infrastructure/persistence/knex/knex';
-import { Either, Left, left, right } from '@/shared/either';
 
 import { ReadRoleRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/roles/read-role-repository.dto';
+import { RoleRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/roles/role-repository.dto';
 
-import { AbstractRolesRepositoryService } from '@/core/abstractions/infrastructure/repositories/roles.repository.service.abstract';
-
-import { AbstractCreateRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/roles/create-role-repository.dto.abstract';
-import { AbstractReadRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/roles/read-role-repository.dto.abstract';
-import { AbstractUpdateRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/roles/update-role-repository.dto.abstract';
-import { AbstractDeleteRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/roles/delete-role-repository.dto.abstract';
-import { AbstractSearchRolesRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/roles/search-roles-repository.dto.abstract';
-import { AbstractRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/roles/role-repository.dto.abstract';
-import { RoleDto } from '@/infrastructure/dtos/persistence/repositories/roles/role-repository.dto';
-
+import { IRolesRepositoryService } from '@/core/interfaces/infrastructure/repositories/roles.repository.service.interface';
+import { Either, left, right } from '@/shared/either';
 import { RolesModel } from '../../database-models/roles.model';
 
 import { InternalServerError } from '@/core/errors/InternalServerError.error';
+import { SearchRolesRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/roles/search-roles-repository.dto';
 @Injectable()
-export class RolesRepositoryService extends AbstractRolesRepositoryService {
-  constructor() {
-    super();
-  }
-
-  public async createRole(
-    dto: AbstractCreateRoleRepositoryDto,
-  ): Promise<Either<InternalServerError, AbstractRoleRepositoryDto>> {
-    try {
-      const createRoleSuccess = await knex('roles')
-        .insert({
-          id: dto.id,
-          name: dto.name,
-          description: dto.description,
-          createdAt: dto.createdAt,
-          updatedAt: dto.updatedAt,
-        })
-        .returning<RolesModel[]>('*');
-
-      if (createRoleSuccess?.[0]?.id?.length) {
-        return right(new RoleDto(createRoleSuccess?.[0]));
-      }
-
-      return left(new InternalServerError());
-    } catch (error) {
-      console.error('RoleRepositoryService error: createRole');
-      console.error(error);
-
-      return left(new InternalServerError());
-    }
-  }
+export class RolesRepositoryService implements IRolesRepositoryService {
+  constructor() {}
 
   public async readRole(
-    dto: AbstractReadRoleRepositoryDto,
-  ): Promise<
-    Either<InternalServerError, AbstractRoleRepositoryDto | undefined>
-  > {
+    dto: ReadRoleRepositoryDto,
+  ): Promise<Either<InternalServerError, RoleRepositoryDto | undefined>> {
     try {
       if (!dto?.id?.trim()?.length && !dto?.name?.trim()?.length) {
         return right(undefined);
@@ -80,7 +41,7 @@ export class RolesRepositoryService extends AbstractRolesRepositoryService {
 
       if (role) {
         return right(
-          new RoleDto({
+          new RoleRepositoryDto({
             id: role.id,
             name: role.name,
             description: role.description,
@@ -99,69 +60,9 @@ export class RolesRepositoryService extends AbstractRolesRepositoryService {
     }
   }
 
-  public async updateRole(
-    dto: AbstractUpdateRoleRepositoryDto,
-  ): Promise<Either<InternalServerError, AbstractRoleRepositoryDto>> {
-    try {
-      const updateRoleSuccess = !!(await knex('roles')
-        .where('id', dto.id)
-        .update({
-          name: dto.name,
-          description: dto.description,
-          updatedAt: dto.updatedAt,
-        }));
-
-      if (updateRoleSuccess) {
-        const eitherRoleUpdated = await this.readRole(
-          new ReadRoleRepositoryDto({ id: dto.id }),
-        );
-
-        if (eitherRoleUpdated instanceof Left) {
-          return left(new InternalServerError());
-        }
-
-        const roleUpdated = eitherRoleUpdated.value;
-
-        if (!roleUpdated?.id?.length) {
-          return left(new InternalServerError());
-        }
-
-        return right(roleUpdated);
-      }
-
-      return left(new InternalServerError());
-    } catch (error) {
-      console.error('RoleRepositoryService error: updateRole');
-      console.error(error);
-
-      return left(new InternalServerError());
-    }
-  }
-
-  public async deleteRole(
-    dto: AbstractDeleteRoleRepositoryDto,
-  ): Promise<Either<InternalServerError, boolean>> {
-    try {
-      const deleteRoleSuccess = !!(await knex('roles')
-        .where('id', dto.id)
-        .del());
-
-      if (deleteRoleSuccess) {
-        return right(true);
-      }
-
-      return left(new InternalServerError());
-    } catch (error) {
-      console.error('RoleRepositoryService error: deleteRole');
-      console.error(error);
-
-      return left(new InternalServerError());
-    }
-  }
-
   public async searchRoles(
-    dto: AbstractSearchRolesRepositoryDto,
-  ): Promise<Either<InternalServerError, AbstractRoleRepositoryDto[]>> {
+    dto: SearchRolesRepositoryDto,
+  ): Promise<Either<InternalServerError, RoleRepositoryDto[]>> {
     try {
       const limit = dto.limit ? Math.min(dto.limit, 100) : 10;
       const page = dto.page && dto.page > 0 ? dto.page : 1;
@@ -208,7 +109,7 @@ export class RolesRepositoryService extends AbstractRolesRepositoryService {
         .limit(limit)
         .offset(offset);
 
-      return right(roles.map((role) => new RoleDto(role)));
+      return right(roles.map((role) => new RoleRepositoryDto(role)));
     } catch (error) {
       console.error('RoleRepositoryService error: searchRoles');
       console.error(error);

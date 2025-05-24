@@ -1,7 +1,3 @@
-import { AbstractCreateUserRoleUseCaseDto } from '@/core/abstractions/application/dtos/use-cases/user-roles/create-user-role-use-case.dto.abstract';
-import { AbstractCreateUserRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/user-roles/create-user-role.dto.abstract';
-import { AbstractDeleteUserRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/user-roles/delete-user-role.dto.abstract';
-import { AbstractSearchUserRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/user-roles/search-user-role.dto.abstract';
 import { InternalServerError } from '@/core/errors/InternalServerError.error';
 import { ICreateUserRoleUseCaseDto } from '@/core/interfaces/application/dtos/use-cases/user-roles/create-user-role-use-case.dto.interface';
 import { ICreateUserRoleRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/user-roles/create-user-role-repository.dto.interface';
@@ -12,9 +8,7 @@ import { Either } from '@/shared/either';
 import { z } from 'zod';
 
 export interface IUserRolesValidationService {
-  validateCreateUserRoleUseCaseDto(
-    dto: AbstractCreateUserRoleUseCaseDto,
-  ): Either<
+  validateCreateUserRoleUseCaseDto(dto: ICreateUserRoleUseCaseDto): Either<
     | z.ZodError<{
         [x: string]: any;
       }>
@@ -23,7 +17,7 @@ export interface IUserRolesValidationService {
   >;
 
   validateCreateUserRoleRepositorySchema(
-    dto: AbstractCreateUserRoleRepositoryDto,
+    dto: ICreateUserRoleRepositoryDto,
   ): Either<
     | InternalServerError
     | z.ZodError<{
@@ -33,7 +27,7 @@ export interface IUserRolesValidationService {
   >;
 
   validateDeleteUserRoleRepositorySchema(
-    dto: AbstractDeleteUserRoleRepositoryDto,
+    dto: IDeleteUserRoleRepositoryDto,
   ): Either<
     | InternalServerError
     | z.ZodError<{
@@ -43,7 +37,7 @@ export interface IUserRolesValidationService {
   >;
 
   validateSearchUserRoleRepositoryDtoSchema(
-    dot: AbstractSearchUserRoleRepositoryDto,
+    dot: ISearchUserRoleRepositoryDto,
   ): Either<
     | InternalServerError
     | z.ZodError<{

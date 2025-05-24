@@ -1,4 +1,5 @@
 import { RolesModel } from '@/infrastructure/persistence/database-models/roles.model';
+import { UsersModel } from '@/infrastructure/persistence/database-models/users.model';
 
 export type ISearchUsersRepositoryDto = Optional<
   Pick<
@@ -13,7 +14,7 @@ export type ISearchUsersRepositoryDto = Optional<
     | 'createdAt'
     | 'updatedAt'
   > & {
-    roles: RolesModel['name'][];
+    roleNames: RolesModel['name'][];
     page: number;
     limit: number;
     createdAtStart: UsersModel['createdAt'];
@@ -34,7 +35,7 @@ export type ISearchUsersRepositoryDto = Optional<
   | 'updatedAt'
   | 'updatedAtStart'
   | 'updatedAtEnd'
-  | 'roles'
+  | 'roleNames'
   | 'page'
   | 'limit'
 >;

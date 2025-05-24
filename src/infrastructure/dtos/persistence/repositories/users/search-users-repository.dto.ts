@@ -1,9 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 import { ISearchUsersRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/users/search-users-repository.dto.interface';
-import { AbstractSearchUsersRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/search-users-repository.dto.abstract';
+import { AbstractAutoSerializableClass } from '@/core/abstractions/@base/auto-serializable-class.abstract';
 
-export class SearchUsersRepositoryDto extends AbstractSearchUsersRepositoryDto {
+export class SearchUsersRepositoryDto
+  extends AbstractAutoSerializableClass<ISearchUsersRepositoryDto>
+  implements ISearchUsersRepositoryDto
+{
   @ApiProperty({
     type: 'string',
     description: 'User uuid',
@@ -140,8 +143,8 @@ export class SearchUsersRepositoryDto extends AbstractSearchUsersRepositoryDto {
     description: 'User roles',
     example: ['customer'],
   })
-  get roles() {
-    return this._dto.roles;
+  get roleNames() {
+    return this._dto.roleNames;
   }
 
   @ApiProperty({

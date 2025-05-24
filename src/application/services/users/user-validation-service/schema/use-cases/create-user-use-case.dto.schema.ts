@@ -5,7 +5,7 @@ import { UserPasswordSchema } from '@/core/schemas/@common/user/user-password.sc
 import { UserFirstNameSchema } from '@/core/schemas/@common/user/user-first-name.schema';
 import { UserLastNameSchema } from '@/core/schemas/@common/user/user-last-name';
 import { UserBirthdateSchema } from '@/core/schemas/@common/user/user-birthdate.schema';
-import { ListRoleTextSchema } from '@/core/schemas/@common/roles/list-role-text.schema';
+import { RoleNameListSchema } from '@/core/schemas/@common/roles/role-name-list.schema';
 import { UserCPFSchema } from '@/core/schemas/@common/user/user-cpf.schema';
 import { UserCNPJSchema } from '@/core/schemas/@common/user/user-cnpj.schema';
 import { EnumUserModelDocument } from '@/infrastructure/persistence/database-models/user.enum';
@@ -16,7 +16,7 @@ const baseUserSchema = z.object({
   firstName: new UserFirstNameSchema().schema,
   lastName: new UserLastNameSchema().schema,
   birthdate: new UserBirthdateSchema().schema,
-  roles: new ListRoleTextSchema().schema,
+  roleNames: new RoleNameListSchema().schema,
 });
 
 const cpfUserSchema = baseUserSchema.extend({

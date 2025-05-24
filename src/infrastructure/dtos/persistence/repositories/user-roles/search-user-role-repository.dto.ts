@@ -1,8 +1,11 @@
-import { AbstractSearchUserRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/user-roles/search-user-role.dto.abstract';
+import { AbstractAutoSerializableClass } from '@/core/abstractions/@base/auto-serializable-class.abstract';
 import { ISearchUserRoleRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/user-roles/search-user-role-repository.dto.interface';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class SearchUserRoleRepositoryDto extends AbstractSearchUserRoleRepositoryDto {
+export class SearchUserRoleRepositoryDto
+  extends AbstractAutoSerializableClass<ISearchUserRoleRepositoryDto>
+  implements ISearchUserRoleRepositoryDto
+{
   @ApiProperty({
     type: 'string',
     format: 'uuid',

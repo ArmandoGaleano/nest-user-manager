@@ -1,27 +1,27 @@
 import { Injectable } from '@nestjs/common';
 
-import { knex } from '@/infrastructure/persistence/knex/knex';
-
-import { AbstractDeleteUserUseCase } from '@/core/abstractions/application/use-cases/users/delete-user.use-case.abstract';
 import { Either, left, Left, right } from '@/shared/either';
-import { AbstractUserValidationService } from '@/core/abstractions/application/services/users/user-validation.service.abstract';
+
 import { InternalServerError } from '@/core/errors/InternalServerError.error';
-import { AbstractDeleteUserRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/delete-user-repository.dto.abstract';
+
 import { z } from 'zod';
-import { AbstractUsersRepositoryService } from '@/core/abstractions/infrastructure/repositories/users.repository.service.abstract';
+
 import { UserDoesNotExistsError } from '@/core/errors/application/services/users/user-validation-service/UserDoesNotExistsError.error';
 import { DeleteUserRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/delete-user-repository.dto';
+import { IDeleteUserUseCase } from '@/core/interfaces/application/use-cases/users/delete-use.use-case.interface';
+import { UserValidationService } from '@/application/services/users/user-validation-service/user-validation.service';
+
+import { IDeleteUserRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/users/delete-user-repository.dto.interface';
+import { UsersRepositoryService } from '@/infrastructure/persistence/repositories/users/user.repository.service';
 
 @Injectable()
-export class DeleteUserUseCase extends AbstractDeleteUserUseCase {
+export class DeleteUserUseCase implements IDeleteUserUseCase {
   constructor(
-    private readonly UserValidationService: AbstractUserValidationService,
-    private readonly UsersRepositoryService: AbstractUsersRepositoryService,
-  ) {
-    super();
-  }
+    private readonly userValidationService: UserValidationService,
+    private readonly usersRepositoryService: UsersRepositoryService,
+  ) {}
 
-  public async execute(dto: AbstractDeleteUserRepositoryDto): Promise<
+  public async execute(dto: IDeleteUserRepositoryDto): Promise<
     Either<
       | z.ZodError<{
           [x: string]: any;
@@ -33,7 +33,7 @@ export class DeleteUserUseCase extends AbstractDeleteUserUseCase {
   > {
     try {
       const eitherValidateDeleteUserSchema =
-        this.UserValidationService.validateDeleteUserSchema(dto);
+        this.userValidationService.validateDeleteUserSchema(dto);
 
       if (eitherValidateDeleteUserSchema instanceof Left) {
         if (
@@ -48,7 +48,7 @@ export class DeleteUserUseCase extends AbstractDeleteUserUseCase {
       const validatedDeleteUserDto = eitherValidateDeleteUserSchema.value;
 
       const eitherValidateUserExists =
-        await this.UserValidationService.isUserRegistered(
+        await this.userValidationService.isUserRegistered(
           validatedDeleteUserDto,
         );
 
@@ -63,7 +63,7 @@ export class DeleteUserUseCase extends AbstractDeleteUserUseCase {
         return left(new UserDoesNotExistsError());
       }
 
-      const eitherDeleteUser = await this.UsersRepositoryService.deleteUser(
+      const eitherDeleteUser = await this.usersRepositoryService.deleteUser(
         new DeleteUserRepositoryDto(validatedDeleteUserDto),
       );
 

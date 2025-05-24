@@ -1,13 +1,5 @@
 import { Injectable } from '@nestjs/common';
 
-import { AbstractUpdateUserUseCase } from '@/core/abstractions/application/use-cases/users/update-user.use-case.abstract';
-
-import { AbstractUserValidationService } from '@/core/abstractions/application/services/users/user-validation.service.abstract';
-import { AbstractUsersRepositoryService } from '@/core/abstractions/infrastructure/repositories/users.repository.service.abstract';
-import { AbstractSystemDateTimeHelperService } from '@/core/abstractions/shared/helpers/system-date-time-helper.abstract';
-
-import { AbstractUpdateUserUseCaseDto } from '@/core/abstractions/application/dtos/use-cases/users/update-user-use-case.dto.abstract';
-import { AbstractUserRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/user-repository.dto.abstract';
 import { UpdateUserRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/update-user-repository.dto';
 
 import { Either, Left, left, right } from '@/shared/either';
@@ -16,17 +8,21 @@ import { z } from 'zod';
 import { InternalServerError } from '@/core/errors/InternalServerError.error';
 import { UpdateUserRepositoryError } from '@/core/errors/repositories/users/UpdateUserRepositoryError.error';
 import { UserAlreadyExistsError } from '@/core/errors/application/services/users/user-validation-service/UserAlreadyExistsError.error';
+import { IUpdateUserUseCase } from '@/core/interfaces/application/use-cases/users/update-user.use-case.interface';
+import { UserValidationService } from '@/application/services/users/user-validation-service/user-validation.service';
+import { UsersRepositoryService } from '@/infrastructure/persistence/repositories/users/user.repository.service';
+import { SystemDateTimeHelperService } from '@/shared/helpers/system-date-time/system-date-time.helper.service';
+import { UpdateUserUseCaseDto } from '@/application/dtos/use-cases/users/update-user-use-case.dto';
+import { UserRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/user-repository.dto';
 @Injectable()
-export class UpdateUserUseCase extends AbstractUpdateUserUseCase {
+export class UpdateUserUseCase implements IUpdateUserUseCase {
   constructor(
-    private readonly UserValidationService: AbstractUserValidationService,
-    private readonly UsersRepositoryService: AbstractUsersRepositoryService,
-    private readonly SystemDateTimeHelperService: AbstractSystemDateTimeHelperService,
-  ) {
-    super();
-  }
+    private readonly userValidationService: UserValidationService,
+    private readonly usersRepositoryService: UsersRepositoryService,
+    private readonly systemDateTimeHelperService: SystemDateTimeHelperService,
+  ) {}
 
-  public async execute(dto: AbstractUpdateUserUseCaseDto): Promise<
+  public async execute(dto: UpdateUserUseCaseDto): Promise<
     Either<
       | z.ZodError<{
           [x: string]: any;
@@ -34,15 +30,15 @@ export class UpdateUserUseCase extends AbstractUpdateUserUseCase {
       | InternalServerError
       | UserAlreadyExistsError
       | UpdateUserRepositoryError,
-      AbstractUserRepositoryDto
+      UserRepositoryDto
     >
   > {
     try {
       const eitherValidateUpdateUserSchema =
-        await this.UserValidationService.validateUpdateUser(
+        await this.userValidationService.validateUpdateUser(
           new UpdateUserRepositoryDto({
             ...dto.toObject(),
-            updatedAt: this.SystemDateTimeHelperService.getDate(),
+            updatedAt: this.systemDateTimeHelperService.getTimestamp(),
           }),
         );
 
@@ -52,7 +48,7 @@ export class UpdateUserUseCase extends AbstractUpdateUserUseCase {
 
       const validateDto = eitherValidateUpdateUserSchema.value;
 
-      const eitherUpdateUser = await this.UsersRepositoryService.updateUser(
+      const eitherUpdateUser = await this.usersRepositoryService.updateUser(
         new UpdateUserRepositoryDto(validateDto),
       );
 

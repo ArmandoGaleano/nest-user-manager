@@ -1,8 +1,11 @@
-import { AbstractUpdateUserUseCaseDto } from '@/core/abstractions/application/dtos/use-cases/users/update-user-use-case.dto.abstract';
-import { IUpdateUserUseCaseDto } from '@/core/interfaces/application/dtos/use-cases/users/update-user-use-case.dto.interface';
 import { ApiProperty } from '@nestjs/swagger';
+import { IUpdateUserUseCaseDto } from '@/core/interfaces/application/dtos/use-cases/users/update-user-use-case.dto.interface';
+import { AbstractAutoSerializableClass } from '@/core/abstractions/@base/auto-serializable-class.abstract';
 
-export class UpdateUserUseCaseDto extends AbstractUpdateUserUseCaseDto {
+export class UpdateUserUseCaseDto
+  extends AbstractAutoSerializableClass<IUpdateUserUseCaseDto>
+  implements IUpdateUserUseCaseDto
+{
   @ApiProperty({
     type: 'string',
     description: 'User uui',

@@ -1,19 +1,18 @@
-import { AbstractReadUserRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/read-user-repository.dto.abstract';
-import { AbstractUserRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/user-repository.dto.abstract';
-
 import { Either } from '@/shared/either';
 import { z } from 'zod';
 
 import { InternalServerError } from '@/core/errors/InternalServerError.error';
+import { ReadUserRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/read-user-repository.dto';
+import { UserRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/user-repository.dto';
 
 export interface IReadUserUseCase {
-  execute(dto: AbstractReadUserRepositoryDto): Promise<
+  execute(dto: ReadUserRepositoryDto): Promise<
     Either<
       | z.ZodError<{
           [x: string]: any;
         }>
       | InternalServerError,
-      AbstractUserRepositoryDto | undefined
+      UserRepositoryDto | undefined
     >
   >;
 }

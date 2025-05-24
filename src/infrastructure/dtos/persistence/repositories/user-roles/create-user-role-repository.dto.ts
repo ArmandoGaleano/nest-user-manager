@@ -1,8 +1,11 @@
-import { AbstractCreateUserRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/user-roles/create-user-role.dto.abstract';
-import { IUserRoleRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/user-roles/user-role-repository.dto.interface';
 import { ApiProperty } from '@nestjs/swagger';
+import { AbstractAutoSerializableClass } from '@/core/abstractions/@base/auto-serializable-class.abstract';
+import { ICreateUserRoleRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/user-roles/create-user-role-repository.dto.interface';
 
-export class CreateUserRoleRepositoryDto extends AbstractCreateUserRoleRepositoryDto {
+export class CreateUserRoleRepositoryDto
+  extends AbstractAutoSerializableClass<ICreateUserRoleRepositoryDto>
+  implements ICreateUserRoleRepositoryDto
+{
   @ApiProperty({
     type: 'string',
     format: 'uuid',
@@ -43,7 +46,7 @@ export class CreateUserRoleRepositoryDto extends AbstractCreateUserRoleRepositor
     return this._dto.updatedAt;
   }
 
-  constructor(private _dto: IUserRoleRepositoryDto) {
+  constructor(private _dto: ICreateUserRoleRepositoryDto) {
     super();
   }
 }

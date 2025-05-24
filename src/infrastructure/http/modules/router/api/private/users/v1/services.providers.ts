@@ -1,42 +1,35 @@
 import { Provider } from '@nestjs/common';
 
-import { AbstractUsersRepositoryService } from '@/core/abstractions/infrastructure/repositories/users.repository.service.abstract';
-import { AbstractRolesRepositoryService } from '@/core/abstractions/infrastructure/repositories/roles.repository.service.abstract';
-import { AbstractUserRolesRepositoryService } from '@/core/abstractions/infrastructure/repositories/user-roles.repository.service.abstract';
-import { AbstractUserValidationService } from '@/core/abstractions/application/services/users/user-validation.service.abstract';
-import { AbstractRolesValidationService } from '@/core/abstractions/application/services/roles/roles-validation.service.abstract';
-import { AbstractAuthService } from '@/core/abstractions/application/services/auth/auth.service.abstract';
-
 import { UsersRepositoryService } from '@/infrastructure/persistence/repositories/users/user.repository.service';
+import { UserValidationService } from '@/application/services/users/user-validation-service/user-validation.service';
+import { AuthService } from '@/application/services/auth/auth.service';
+import { RolesValidationService } from '@/application/services/roles/roles-validation-service/roles-validation.service';
 import { RolesRepositoryService } from '@/infrastructure/persistence/repositories/roles/roles.repository.service';
 import { UserRolesRepositoryService } from '@/infrastructure/persistence/repositories/user_roles/user-roles.repository.service';
-import { UserValidationService } from '@/application/services/users/user-validation-service/user-validation.service';
-import { RolesValidationService } from '@/application/services/roles/roles-validation-service/roles-validation.service';
-import { AuthService } from '@/application/services/auth/auth.service';
 
 export const serviceProviders: Provider[] = [
   {
-    provide: AbstractUsersRepositoryService,
+    provide: UsersRepositoryService,
     useClass: UsersRepositoryService,
   },
   {
-    provide: AbstractRolesRepositoryService,
+    provide: RolesRepositoryService,
     useClass: RolesRepositoryService,
   },
   {
-    provide: AbstractUserRolesRepositoryService,
+    provide: UserRolesRepositoryService,
     useClass: UserRolesRepositoryService,
   },
   {
-    provide: AbstractUserValidationService,
+    provide: UserValidationService,
     useClass: UserValidationService,
   },
   {
-    provide: AbstractRolesValidationService,
+    provide: RolesValidationService,
     useClass: RolesValidationService,
   },
   {
-    provide: AbstractAuthService,
+    provide: AuthService,
     useClass: AuthService,
   },
 ];

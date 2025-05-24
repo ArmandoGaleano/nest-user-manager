@@ -19,6 +19,10 @@ const config: { [key: string]: Knex.Config } = {
       directory: './migrations/production',
       extension: 'js',
     },
+    seeds: {
+      directory: './seeds',
+      extension: 'js',
+    },
   },
   development: {
     client: 'postgresql',
@@ -36,6 +40,10 @@ const config: { [key: string]: Knex.Config } = {
     migrations: {
       tableName: 'knex_migrations',
       directory: './migrations/development',
+      extension: 'js',
+    },
+    seeds: {
+      directory: './seeds',
       extension: 'js',
     },
   },
@@ -58,6 +66,10 @@ const config: { [key: string]: Knex.Config } = {
       directory: './migrations/staging',
       extension: 'js',
     },
+    seeds: {
+      directory: './seeds',
+      extension: 'js',
+    },
   },
 
   production: {
@@ -76,6 +88,10 @@ const config: { [key: string]: Knex.Config } = {
     migrations: {
       tableName: 'knex_migrations',
       directory: './migrations/production',
+      extension: 'js',
+    },
+    seeds: {
+      directory: './seeds',
       extension: 'js',
     },
   },

@@ -1,9 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import { AbstractSearchUsersRepositoryResultDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/search-users-repository-result.dto.abstract';
 import { ISearchUsersRepositoryResultDto } from '@/core/interfaces/infrastructure/dtos/repositories/users/search-users-repository-result.dto.interface';
+import { AbstractAutoSerializableClass } from '@/core/abstractions/@base/auto-serializable-class.abstract';
 
-export class SearchUsersRepositoryResultDto extends AbstractSearchUsersRepositoryResultDto {
+export class SearchUsersRepositoryResultDto
+  extends AbstractAutoSerializableClass<ISearchUsersRepositoryResultDto>
+  implements ISearchUsersRepositoryResultDto
+{
   @ApiProperty({
     type: 'array',
     description: 'Array of user data',

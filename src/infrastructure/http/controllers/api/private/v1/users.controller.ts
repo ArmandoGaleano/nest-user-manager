@@ -10,40 +10,38 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 
-import { AbstractCreateUserUseCase } from '@/core/abstractions/application/use-cases/users/create-user.use-case.abstract';
-import { AbstractReadUserUseCase } from '@/core/abstractions/application/use-cases/users/read-user.use-case.abstract';
-import { AbstractUpdateUserUseCase } from '@/core/abstractions/application/use-cases/users/update-user.use-case.abstract';
-import { AbstractDeleteUserUseCase } from '@/core/abstractions/application/use-cases/users/delete-user.use-case.abstract';
-import { AbstractSearchUsersUseCase } from '@/core/abstractions/application/use-cases/users/search-users.use-case.abstract';
+import { CreateUserUseCase } from '@/application/use-cases/users/create-user.use-case';
+import { ReadUserUseCase } from '@/application/use-cases/users/read-user.use-case';
+import { UpdateUserUseCase } from '@/application/use-cases/users/update-user.use-case';
+import { DeleteUserUseCase } from '@/application/use-cases/users/delete-user.use-case';
+import { SearchUsersUseCase } from '@/application/use-cases/users/search-users.use-case';
 
 import { CreateUserUseCaseDto } from '@/application/dtos/use-cases/users/create-user-use-case.dto';
 import { ReadUserRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/read-user-repository.dto';
 import { UpdateUserUseCaseDto } from '@/application/dtos/use-cases/users/update-user-use-case.dto';
 import { DeleteUserRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/delete-user-repository.dto';
+import { SearchUsersRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/search-users-repository.dto';
+
+import { RoleNotFoundError } from '@/core/errors/application/services/roles/roles-validation-service/RoleNotFoundError.error';
+import { UserAlreadyExistsError } from '@/core/errors/application/services/users/user-validation-service/UserAlreadyExistsError.error';
+import { UserDoesNotExistsError } from '@/core/errors/application/services/users/user-validation-service/UserDoesNotExistsError.error';
+
+import { Left } from '@/shared/either';
+import { z } from 'zod';
 
 import { ICreateUserUseCaseDto } from '@/core/interfaces/application/dtos/use-cases/users/create-user-use-case.dto.interface';
 import { IReadUserRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/users/read-user-repository.dto.interface';
 import { IUpdateUserUseCaseDto } from '@/core/interfaces/application/dtos/use-cases/users/update-user-use-case.dto.interface';
 import { IDeleteUserRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/users/delete-user-repository.dto.interface';
 import { ISearchUsersRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/users/search-users-repository.dto.interface';
-
-import { SearchUsersRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/search-users-repository.dto';
-
-import { Left } from '@/shared/either';
-import { z } from 'zod';
-
-import { RoleNotFoundError } from '@/core/errors/application/services/roles/roles-validation-service/RoleNotFoundError.error';
-import { UserAlreadyExistsError } from '@/core/errors/application/services/users/user-validation-service/UserAlreadyExistsError.error';
-import { UpdateUserRepositoryError } from '@/core/errors/repositories/users/UpdateUserRepositoryError.error';
-import { UserDoesNotExistsError } from '@/core/errors/application/services/users/user-validation-service/UserDoesNotExistsError.error';
 @Controller('users')
 export class UsersV1Controller {
   constructor(
-    private CreateUserUseCase: AbstractCreateUserUseCase,
-    private ReadUserUseCase: AbstractReadUserUseCase,
-    private UpdateUserUseCase: AbstractUpdateUserUseCase,
-    private DeleteUserUseCase: AbstractDeleteUserUseCase,
-    private SearchUsersUseCase: AbstractSearchUsersUseCase,
+    private createUserUseCase: CreateUserUseCase,
+    private readUserUseCase: ReadUserUseCase,
+    private updateUserUseCase: UpdateUserUseCase,
+    private deleteUserUseCase: DeleteUserUseCase,
+    private searchUsersUseCase: SearchUsersUseCase,
   ) {}
 
   @Post()
@@ -52,7 +50,7 @@ export class UsersV1Controller {
     @Body() createUserUseCaseDto: ICreateUserUseCaseDto,
   ) {
     try {
-      const eitherCreateUserUseCase = await this.CreateUserUseCase.execute(
+      const eitherCreateUserUseCase = await this.createUserUseCase.execute(
         new CreateUserUseCaseDto(createUserUseCaseDto),
       );
 
@@ -93,7 +91,7 @@ export class UsersV1Controller {
     @Query() readUserRepositoryDto: IReadUserRepositoryDto,
   ) {
     try {
-      const eitherReadUserUseCase = await this.ReadUserUseCase.execute(
+      const eitherReadUserUseCase = await this.readUserUseCase.execute(
         new ReadUserRepositoryDto(readUserRepositoryDto),
       );
 
@@ -129,7 +127,7 @@ export class UsersV1Controller {
     @Body() updateUserUseCaseDto: IUpdateUserUseCaseDto,
   ) {
     try {
-      const eitherUpdateUserUseCase = await this.UpdateUserUseCase.execute(
+      const eitherUpdateUserUseCase = await this.updateUserUseCase.execute(
         new UpdateUserUseCaseDto(updateUserUseCaseDto),
       );
 
@@ -161,7 +159,7 @@ export class UsersV1Controller {
     @Query() deleteUserRepositoryDto: IDeleteUserRepositoryDto,
   ) {
     try {
-      const eitherDeleteUserUseCase = await this.DeleteUserUseCase.execute(
+      const eitherDeleteUserUseCase = await this.deleteUserUseCase.execute(
         new DeleteUserRepositoryDto(deleteUserRepositoryDto),
       );
 
@@ -202,7 +200,7 @@ export class UsersV1Controller {
     @Query() searchUsersRepositoryDto: ISearchUsersRepositoryDto,
   ) {
     try {
-      const eitherSearchUsersUseCase = await this.SearchUsersUseCase.execute(
+      const eitherSearchUsersUseCase = await this.searchUsersUseCase.execute(
         new SearchUsersRepositoryDto(searchUsersRepositoryDto),
       );
 

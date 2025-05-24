@@ -1,24 +1,22 @@
 import { z } from 'zod';
 import { Either } from '@/shared/either';
 
-import { InternalServerError } from '@/core/errors/InternalServerError.error';
-
+import { ICreateUserRepositoryDto } from '../../../infrastructure/dtos/repositories/users/create-user-repository.dto.interface';
 import { IReadUserRepositoryDto } from '../../../infrastructure/dtos/repositories/users/read-user-repository.dto.interface';
 import { IUpdateUserRepositoryDto } from '../../../infrastructure/dtos/repositories/users/update-user-repository.dto.interface';
 import { IDeleteUserRepositoryDto } from '../../../infrastructure/dtos/repositories/users/delete-user-repository.dto.interface';
 import { ISearchUsersRepositoryDto } from '../../../infrastructure/dtos/repositories/users/search-users-repository.dto.interface';
-import { UserAlreadyExistsError } from '@/core/errors/application/services/users/user-validation-service/UserAlreadyExistsError.error';
-import { AbstractCreateUserUseCaseDto } from '@/core/abstractions/application/dtos/use-cases/users/create-user-use-case.dto.abstract';
-import { ICreateUserUseCaseDto } from '../../dtos/use-cases/users/create-user-use-case.dto.interface';
-import { AbstractCreateUserRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/create-user-repository.dto.abstract';
-import { ICreateUserRepositoryDto } from '../../../infrastructure/dtos/repositories/users/create-user-repository.dto.interface';
-import { AbstractReadUserRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/read-user-repository.dto.abstract';
-import { AbstractUpdateUserRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/update-user-repository.dto.abstract';
-import { AbstractDeleteUserRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/delete-user-repository.dto.abstract';
-import { AbstractSearchUsersRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/search-users-repository.dto.abstract';
 
+import { CreateUserRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/create-user-repository.dto';
+import { UpdateUserRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/update-user-repository.dto';
+
+import { ICreateUserUseCaseDto } from '../../dtos/use-cases/users/create-user-use-case.dto.interface';
+
+import { InternalServerError } from '@/core/errors/InternalServerError.error';
+import { UserAlreadyExistsError } from '@/core/errors/application/services/users/user-validation-service/UserAlreadyExistsError.error';
+import { UsersModel } from '@/infrastructure/persistence/database-models/users.model';
 export interface IUserValidationService {
-  validateCreateUserUseCaseSchema(dto: AbstractCreateUserUseCaseDto): Either<
+  validateCreateUserUseCaseSchema(dto: ICreateUserUseCaseDto): Either<
     | z.ZodError<{
         [x: string]: any;
       }>
@@ -26,62 +24,60 @@ export interface IUserValidationService {
     ICreateUserUseCaseDto
   >;
 
-  validateCreateUserRepositorySchema(
-    dto: AbstractCreateUserRepositoryDto,
-  ): Either<
+  validateCreateUserRepositorySchema(dto: ICreateUserRepositoryDto): Either<
     | z.ZodError<{
         [x: string]: any;
       }>
     | InternalServerError,
     ICreateUserRepositoryDto
   >;
-  validateReadUserSchema(dto: AbstractReadUserRepositoryDto): Either<
+  validateReadUserSchema(dto: IReadUserRepositoryDto): Either<
     | z.ZodError<{
         [x: string]: any;
       }>
     | InternalServerError,
     IReadUserRepositoryDto
   >;
-  validateUpdateUserSchema(dto: AbstractUpdateUserRepositoryDto): Either<
+  validateUpdateUserSchema(dto: IUpdateUserRepositoryDto): Either<
     | z.ZodError<{
         [x: string]: any;
       }>
     | InternalServerError,
     IUpdateUserRepositoryDto
   >;
-  validateDeleteUserSchema(dto: AbstractDeleteUserRepositoryDto): Either<
+  validateDeleteUserSchema(dto: IDeleteUserRepositoryDto): Either<
     | z.ZodError<{
         [x: string]: any;
       }>
     | InternalServerError,
     IDeleteUserRepositoryDto
   >;
-  validateSearchUsersSchema(dto: AbstractSearchUsersRepositoryDto): Either<
+  validateSearchUsersSchema(dto: ISearchUsersRepositoryDto): Either<
     | z.ZodError<{
         [x: string]: any;
       }>
     | InternalServerError,
     ISearchUsersRepositoryDto
   >;
-  validateCreateUser(dto: AbstractCreateUserRepositoryDto): Promise<
+  validateCreateUser(dto: ICreateUserRepositoryDto): Promise<
     Either<
       | z.ZodError<{
           [x: string]: any;
         }>
       | InternalServerError
       | UserAlreadyExistsError,
-      AbstractCreateUserRepositoryDto
+      CreateUserRepositoryDto
     >
   >;
 
-  validateUpdateUser(dto: AbstractUpdateUserRepositoryDto): Promise<
+  validateUpdateUser(dto: IUpdateUserRepositoryDto): Promise<
     Either<
       | z.ZodError<{
           [x: string]: any;
         }>
       | InternalServerError
       | UserAlreadyExistsError,
-      IUpdateUserRepositoryDto
+      UpdateUserRepositoryDto
     >
   >;
 

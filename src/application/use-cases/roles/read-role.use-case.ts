@@ -1,34 +1,29 @@
 import { Injectable } from '@nestjs/common';
 
-import { AbstractReadRoleUseCase } from '@/core/abstractions/application/use-cases/roles/read-role.use-case.abstract';
-
-import { AbstractRolesValidationService } from '@/core/abstractions/application/services/roles/roles-validation.service.abstract';
-import { AbstractRolesRepositoryService } from '@/core/abstractions/infrastructure/repositories/roles.repository.service.abstract';
-
-import { AbstractReadRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/roles/read-role-repository.dto.abstract';
-import { AbstractRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/roles/role-repository.dto.abstract';
 import { ReadRoleRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/roles/read-role-repository.dto';
 
 import { Either, left, Left } from '@/shared/either';
 import { z } from 'zod';
 
 import { InternalServerError } from '@/core/errors/InternalServerError.error';
+import { IReadRoleUseCase } from '@/core/interfaces/application/use-cases/roles/read-role.use-case.interface';
+import { RolesRepositoryService } from '@/infrastructure/persistence/repositories/roles/roles.repository.service';
+import { RolesValidationService } from '@/application/services/roles/roles-validation-service/roles-validation.service';
+import { RoleRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/roles/role-repository.dto';
 @Injectable()
-export class ReadRoleUseCase extends AbstractReadRoleUseCase {
+export class ReadRoleUseCase implements IReadRoleUseCase {
   constructor(
-    private readonly rolesRepositoryService: AbstractRolesRepositoryService,
-    private readonly rolesValidationService: AbstractRolesValidationService,
-  ) {
-    super();
-  }
+    private readonly rolesRepositoryService: RolesRepositoryService,
+    private readonly rolesValidationService: RolesValidationService,
+  ) {}
 
-  public async execute(dto: AbstractReadRoleRepositoryDto): Promise<
+  public async execute(dto: ReadRoleRepositoryDto): Promise<
     Either<
       | z.ZodError<{
           [x: string]: any;
         }>
       | InternalServerError,
-      AbstractRoleRepositoryDto | undefined
+      RoleRepositoryDto | undefined
     >
   > {
     try {

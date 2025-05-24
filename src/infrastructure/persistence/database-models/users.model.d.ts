@@ -1,14 +1,14 @@
-interface UsersModel {
-  id: string;
+export interface UsersModel {
+  id: string; // UUID
   email: string;
   password: string;
   firstName: string;
   lastName: string;
-  birthdate: string;
-  document: string;
-  documentType: UserModelDocumentType;
-  createdAt: Date;
-  updatedAt: Date;
+  birthdate: string; // YYYY-MM-DD
+  document: string; // CPF string or CNPJ string
+  documentType: UserModelDocumentType; // 'CPF' or 'CNPJ'
+  createdAt: number; // Timestamp
+  updatedAt: number; // Timestamp
 }
 
-type UserModelDocumentType = 'CPF' | 'CNPJ';
+export type UserModelDocumentType = 'CPF' | 'CNPJ';

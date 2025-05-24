@@ -46,6 +46,19 @@ printf "
 \033[1;32m🟢  Migrations aplicadas com sucesso!\033[0m
 "
 
+# ─── 4. Rodar seeds (Knex) ───────────────────────────────────────────────────────
+printf "
+========================================
+"
+printf "         🌱 Executando seeds (Knex)...         
+"
+printf "========================================
+"
+npx knex seed:run --knexfile="$PROJECT_ROOT/dist/src/infrastructure/persistence/knex/knexfile.js"
+printf "
+\033[1;32m🟢  Seeds executados com sucesso!\033[0m
+"
+
 # ─── 5. Iniciar aplicação (NestJS watch) ─────────────────────────────────────────
 printf "
 🚀  Iniciando Servidor...

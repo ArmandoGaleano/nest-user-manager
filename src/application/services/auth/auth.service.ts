@@ -1,15 +1,11 @@
 import { Injectable } from '@nestjs/common';
 
-import { AbstractAuthService } from '@/core/abstractions/application/services/auth/auth.service.abstract';
-import { AbstractCryptoHelperService } from '@/core/abstractions/shared/helpers/crypto-helper.service.abstract';
+import { IAuthService } from '@/core/interfaces/application/services/auth/auth-service.interface';
+import { ICryptoHelperService } from '@/core/interfaces/shared/helpers/crypto.helper.service.interface';
 
 @Injectable()
-export class AuthService extends AbstractAuthService {
-  constructor(
-    private readonly CryptoHelperService: AbstractCryptoHelperService,
-  ) {
-    super();
-  }
+export class AuthService implements IAuthService {
+  constructor(private readonly CryptoHelperService: ICryptoHelperService) {}
 
   async hashPassword(password: string): Promise<string> {
     return await this.CryptoHelperService.hashPassword(password);

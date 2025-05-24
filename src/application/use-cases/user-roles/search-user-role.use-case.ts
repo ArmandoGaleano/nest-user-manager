@@ -1,41 +1,36 @@
 import { Injectable } from '@nestjs/common';
 
-import { AbstractSearchUserRoleUseCase } from '@/core/abstractions/application/use-cases/user-roles/search-user-role.use-case.abstract';
-
-import { AbstractUserRolesRepositoryService } from '@/core/abstractions/infrastructure/repositories/user-roles.repository.service.abstract';
-import { AbstractUserRolesValidationService } from '@/core/abstractions/application/services/user-roles/user-roles-validation.service.abstract';
-
-import { AbstractSearchUserRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/user-roles/search-user-role.dto.abstract';
-import { AbstractUserRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/user-roles/user-role-repository.dto.abstract';
 import { SearchUserRoleRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/user-roles/search-user-role-repository.dto';
 
 import { Either, Left, left, right } from '@/shared/either';
 import { z } from 'zod';
 
 import { InternalServerError } from '@/core/errors/InternalServerError.error';
+import { ISearchUserRoleUseCase } from '@/core/interfaces/application/use-cases/user-roles/search-user-role.use-case.interface';
+import { UserRolesRepositoryService } from '@/infrastructure/persistence/repositories/user_roles/user-roles.repository.service';
+import { UserRolesValidationService } from '@/application/services/user-roles/user-roles-validation-service/user-roles-validation.service';
+import { UserRoleRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/user-roles/user-role-repository.dto';
 
 @Injectable()
-export class SearchUserRoleUseCase extends AbstractSearchUserRoleUseCase {
+export class SearchUserRoleUseCase implements ISearchUserRoleUseCase {
   constructor(
-    private readonly UserRoleRepositoryService: AbstractUserRolesRepositoryService,
-    private readonly UserRolesValidationService: AbstractUserRolesValidationService,
-  ) {
-    super();
-  }
+    private readonly userRoleRepositoryService: UserRolesRepositoryService,
+    private readonly userRolesValidationService: UserRolesValidationService,
+  ) {}
 
-  public async execute(dto: AbstractSearchUserRoleRepositoryDto): Promise<
+  public async execute(dto: SearchUserRoleRepositoryDto): Promise<
     Either<
       | z.ZodError<{
           [x: string]: any;
         }>
       | InternalServerError,
-      AbstractUserRoleRepositoryDto[]
+      UserRoleRepositoryDto[]
     >
   > {
     try {
       // Validate repository DTO schema
       const eitherValidateCreateUserRoleDto =
-        this.UserRolesValidationService.validateSearchUserRoleRepositoryDtoSchema(
+        this.userRolesValidationService.validateSearchUserRoleRepositoryDtoSchema(
           dto,
         );
 
@@ -51,7 +46,7 @@ export class SearchUserRoleUseCase extends AbstractSearchUserRoleUseCase {
 
       // search user roles
       const eitherSearchUserRole =
-        await this.UserRoleRepositoryService.searchUserRole(
+        await this.userRoleRepositoryService.searchUserRole(
           new SearchUserRoleRepositoryDto(
             eitherValidateCreateUserRoleDto.value,
           ),
@@ -65,7 +60,11 @@ export class SearchUserRoleUseCase extends AbstractSearchUserRoleUseCase {
         return left(eitherSearchUserRole.value);
       }
 
-      return right(eitherSearchUserRole.value);
+      return right(
+        eitherSearchUserRole.value.map(
+          (userRole) => new UserRoleRepositoryDto(userRole),
+        ),
+      );
     } catch (error) {
       console.error('CreateUserRoleUseCase error when executing execute');
       console.error(error);

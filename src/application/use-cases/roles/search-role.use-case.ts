@@ -1,38 +1,34 @@
 import { Injectable } from '@nestjs/common';
-import { AbstractSearchRoleUseCase } from '@/core/abstractions/application/use-cases/roles/search-role.use-case.abstract';
 
-import { AbstractRolesRepositoryService } from '@/core/abstractions/infrastructure/repositories/roles.repository.service.abstract';
-import { AbstractRolesValidationService } from '@/core/abstractions/application/services/roles/roles-validation.service.abstract';
-
-import { AbstractSearchRolesRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/roles/search-roles-repository.dto.abstract';
-import { AbstractRoleRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/roles/role-repository.dto.abstract';
 import { SearchRolesRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/roles/search-roles-repository.dto';
 
 import { Either, Left, left } from '@/shared/either';
 import { z } from 'zod';
 import { InternalServerError } from '@/core/errors/InternalServerError.error';
+import { RolesRepositoryService } from '@/infrastructure/persistence/repositories/roles/roles.repository.service';
+import { RolesValidationService } from '@/application/services/roles/roles-validation-service/roles-validation.service';
+import { RoleRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/roles/role-repository.dto';
+import { ISearchRoleUseCase } from '@/core/interfaces/application/use-cases/roles/search-role.use-case.interface';
 
 @Injectable()
-export class SearchRoleUseCase extends AbstractSearchRoleUseCase {
+export class SearchRoleUseCase implements ISearchRoleUseCase {
   constructor(
-    private readonly RoleRepositoryService: AbstractRolesRepositoryService,
-    private readonly RolesValidationService: AbstractRolesValidationService,
-  ) {
-    super();
-  }
+    private readonly roleRepositoryService: RolesRepositoryService,
+    private readonly rolesValidationService: RolesValidationService,
+  ) {}
 
-  public async execute(dto: AbstractSearchRolesRepositoryDto): Promise<
+  public async execute(dto: SearchRolesRepositoryDto): Promise<
     Either<
       | z.ZodError<{
           [x: string]: any;
         }>
       | InternalServerError,
-      AbstractRoleRepositoryDto[]
+      RoleRepositoryDto[]
     >
   > {
     try {
       const eitherValidateRoleDto =
-        await this.RolesValidationService.validateSearchRolesRepositoryDtoSchema(
+        await this.rolesValidationService.validateSearchRolesRepositoryDtoSchema(
           new SearchRolesRepositoryDto(dto),
         );
 
@@ -44,7 +40,7 @@ export class SearchRoleUseCase extends AbstractSearchRoleUseCase {
         return left(eitherValidateRoleDto.value);
       }
 
-      const eitherSearchRole = await this.RoleRepositoryService.searchRoles(
+      const eitherSearchRole = await this.roleRepositoryService.searchRoles(
         new SearchRolesRepositoryDto(eitherValidateRoleDto.value),
       );
 

@@ -1,13 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import argon2 from 'argon2';
-import { AbstractCryptoHelperService } from '@/core/abstractions/shared/helpers/crypto-helper.service.abstract';
+import { ICryptoHelperService } from '@/core/interfaces/shared/helpers/crypto.helper.service.interface';
 
 @Injectable()
-export class CryptoHelperService extends AbstractCryptoHelperService {
-  constructor() {
-    super();
-  }
+export class CryptoHelperService implements ICryptoHelperService {
+  constructor() {}
 
   generateUUID(): string {
     return randomUUID();

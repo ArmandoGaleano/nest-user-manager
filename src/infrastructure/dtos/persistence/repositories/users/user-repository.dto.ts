@@ -1,9 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import { AbstractUserRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/user-repository.dto.abstract';
 import { IUserRepositoryDto } from '@/core/interfaces/infrastructure/dtos/repositories/users/user-repository.dto.interface';
+import { AbstractAutoSerializableClass } from '@/core/abstractions/@base/auto-serializable-class.abstract';
 
-export class UserRepositoryDto extends AbstractUserRepositoryDto {
+export class UserRepositoryDto
+  extends AbstractAutoSerializableClass<IUserRepositoryDto>
+  implements IUserRepositoryDto
+{
   @ApiProperty({
     type: 'string',
     description: 'User uuid',

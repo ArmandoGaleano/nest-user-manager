@@ -1,7 +1,7 @@
-import { AbstractUserRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/user-repository.dto.abstract';
+import { UserRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/user-repository.dto';
 
 export type ISearchUsersRepositoryResultDto = {
-  data: AbstractUserRepositoryDto[];
+  data: UserRepositoryDto[];
   page: number;
   limit: number;
   total: number;

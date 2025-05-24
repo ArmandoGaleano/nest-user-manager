@@ -1,22 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { AbstractCreateUserUseCase } from '../../../core/abstractions/application/use-cases/users/create-user.use-case.abstract';
-
-import { AbstractUserValidationService } from '@/core/abstractions/application/services/users/user-validation.service.abstract';
-import { AbstractRolesValidationService } from '@/core/abstractions/application/services/roles/roles-validation.service.abstract';
-import { AbstractUsersRepositoryService } from '@/core/abstractions/infrastructure/repositories/users.repository.service.abstract';
-import { AbstractUserRolesRepositoryService } from '@/core/abstractions/infrastructure/repositories/user-roles.repository.service.abstract';
-import { AbstractRolesRepositoryService } from '@/core/abstractions/infrastructure/repositories/roles.repository.service.abstract';
-import { AbstractCryptoHelperService } from '@/core/abstractions/shared/helpers/crypto-helper.service.abstract';
-import { AbstractSystemDateTimeHelperService } from '@/core/abstractions/shared/helpers/system-date-time-helper.abstract';
-
-import { AbstractCreateUserUseCaseDto } from '@/core/abstractions/application/dtos/use-cases/users/create-user-use-case.dto.abstract';
-
-import { UserEntity } from '@/domain/users/user.entity';
-import { CreateUserRoleRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/user-roles/create-user-role-repository.dto';
 import { CreateUserRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/create-user-repository.dto';
-import { ReadRoleRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/roles/read-role-repository.dto';
-import { AbstractUserEntity } from '@/core/abstractions/domain/entities/user.abstract';
 
 import { Either, Left, left, right } from '@/shared/either';
 import { z } from 'zod';
@@ -24,22 +8,32 @@ import { z } from 'zod';
 import { InternalServerError } from '@/core/errors/InternalServerError.error';
 import { UserAlreadyExistsError } from '@/core/errors/application/services/users/user-validation-service/UserAlreadyExistsError.error';
 import { RoleNotFoundError } from '@/core/errors/application/services/roles/roles-validation-service/RoleNotFoundError.error';
+import { ICreateUserUseCase } from '@/core/interfaces/application/use-cases/users/create-user.use-case.interface';
+import { UserValidationService } from '@/application/services/users/user-validation-service/user-validation.service';
+import { UsersRepositoryService } from '@/infrastructure/persistence/repositories/users/user.repository.service';
+import { CryptoHelperService } from '@/shared/helpers/crypto/crypto.helper.service';
+import { SystemDateTimeHelperService } from '@/shared/helpers/system-date-time/system-date-time.helper.service';
+import { CreateUserUseCaseDto } from '@/application/dtos/use-cases/users/create-user-use-case.dto';
+import { RolesValidationService } from '@/application/services/roles/roles-validation-service/roles-validation.service';
+import { RolesRepositoryService } from '@/infrastructure/persistence/repositories/roles/roles.repository.service';
+import { ReadRoleRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/roles/read-role-repository.dto';
+import { UserRolesRepositoryService } from '@/infrastructure/persistence/repositories/user_roles/user-roles.repository.service';
+import { CreateUserRoleRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/user-roles/create-user-role-repository.dto';
+import { UserRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/user-repository.dto';
 
 @Injectable()
-export class CreateUserUseCase extends AbstractCreateUserUseCase {
+export class CreateUserUseCase implements ICreateUserUseCase {
   constructor(
-    private readonly UserValidationService: AbstractUserValidationService,
-    private readonly RoleValidationService: AbstractRolesValidationService,
-    private readonly UsersRepositoryService: AbstractUsersRepositoryService,
-    private readonly UserRolesRepositoryService: AbstractUserRolesRepositoryService,
-    private readonly RolesRepositoryService: AbstractRolesRepositoryService,
-    private readonly CryptoHelperService: AbstractCryptoHelperService,
-    private readonly SystemDateTimeHelperService: AbstractSystemDateTimeHelperService,
-  ) {
-    super();
-  }
+    private readonly userValidationService: UserValidationService,
+    private readonly roleValidationService: RolesValidationService,
+    private readonly usersRepositoryService: UsersRepositoryService,
+    private readonly rolesRepositoryService: RolesRepositoryService,
+    private readonly userRolesRepositoryService: UserRolesRepositoryService,
+    private readonly cryptoHelperService: CryptoHelperService,
+    private readonly systemDateTimeHelperService: SystemDateTimeHelperService,
+  ) {}
 
-  public async execute(dto: AbstractCreateUserUseCaseDto): Promise<
+  public async execute(dto: CreateUserUseCaseDto): Promise<
     Either<
       | z.ZodError<{
           [x: string]: any;
@@ -47,125 +41,128 @@ export class CreateUserUseCase extends AbstractCreateUserUseCase {
       | InternalServerError
       | UserAlreadyExistsError
       | RoleNotFoundError,
-      AbstractUserEntity
+      UserRepositoryDto
     >
   > {
     try {
       // Validate use case DTO schema
       const eitherValidateCreateUserUseCaseDto =
-        this.UserValidationService.validateCreateUserUseCaseSchema(dto);
+        this.userValidationService.validateCreateUserUseCaseSchema(dto);
 
       if (eitherValidateCreateUserUseCaseDto instanceof Left) {
         return eitherValidateCreateUserUseCaseDto;
       }
 
-      const { roles } = eitherValidateCreateUserUseCaseDto.value;
+      const { roleNames } = eitherValidateCreateUserUseCaseDto.value;
 
-      const userId = this.CryptoHelperService.generateUUID();
-      const createdAt = this.SystemDateTimeHelperService.getDate();
-      const updatedAt = this.SystemDateTimeHelperService.getDate();
+      const userId = this.cryptoHelperService.generateUUID();
+      const createdAt = this.systemDateTimeHelperService.getTimestamp();
+      const updatedAt = this.systemDateTimeHelperService.getTimestamp();
 
-      // Validate repository DTO schema and validate user existence
-      const eitherValidateCreateUser =
-        await this.UserValidationService.validateCreateUser(
-          new CreateUserRepositoryDto({
-            ...eitherValidateCreateUserUseCaseDto.value,
-            id: userId,
-            createdAt,
-            updatedAt,
-          }),
-        );
-
-      if (eitherValidateCreateUser instanceof Left) {
-        return eitherValidateCreateUser;
-      }
-
-      const validatedUserData = eitherValidateCreateUser.value;
-
-      // Validate role existence
-      const eitherValidateRolesExists =
-        await this.RoleValidationService.validateRolesExists(
-          roles.map((roleName) => ({ name: roleName })),
-        );
-
-      if (eitherValidateRolesExists instanceof Left) {
-        return left(eitherValidateRolesExists.value);
-      }
-
-      const eitherRolePromises = roles.map((roleName) => {
-        return this.RolesRepositoryService.readRole(
-          new ReadRoleRepositoryDto({
-            name: roleName,
-          }),
-        );
-      });
-
-      const rolesSearched = (await Promise.all(eitherRolePromises)).map(
-        (eitherRole) => {
-          if (eitherRole instanceof Left) {
-            throw eitherRole;
-          }
-
-          if (eitherRole.value === undefined) {
-            throw new RoleNotFoundError(
-              roles.map((roleName) => ({ name: roleName })),
-            );
-          }
-
-          return eitherRole.value;
-        },
-      );
-
-      const roleIds = rolesSearched.map((role) => role.id);
-
-      // Create user
-      const eitherCreateUser = await this.UsersRepositoryService.createUser(
-        new CreateUserRepositoryDto({
-          ...validatedUserData.toObject(),
-          password: await this.CryptoHelperService.hashPassword(
-            validatedUserData.password,
-          ),
-        }),
-      );
-
-      if (eitherCreateUser instanceof Left) {
-        return left(eitherCreateUser.value);
-      }
-
-      // Create user roles
-      const definedRoles = await Promise.all(
-        roleIds.map((roleId) =>
-          this.UserRolesRepositoryService.createUserRole(
-            new CreateUserRoleRepositoryDto({
-              user_id: validatedUserData.id,
-              role_id: roleId,
+      try {
+        // Validate repository DTO schema and validate user existence
+        const eitherValidateCreateUser =
+          await this.userValidationService.validateCreateUser(
+            new CreateUserRepositoryDto({
+              ...eitherValidateCreateUserUseCaseDto.value,
+              id: userId,
               createdAt,
               updatedAt,
             }),
-          ),
-        ),
-      );
+          );
 
-      for (const role of definedRoles) {
-        if (role instanceof Left) {
-          throw role.value;
+        if (eitherValidateCreateUser instanceof Left) {
+          return eitherValidateCreateUser;
         }
-      }
 
-      return right(
-        new UserEntity({
-          ...eitherCreateUser.value.toObject(),
-          roles: rolesSearched.map((role) => role.toObject()),
-        }),
-      );
+        const validatedUserData = eitherValidateCreateUser.value;
+
+        // Validate role existence
+        const eitherValidateRolesExists =
+          await this.roleValidationService.validateRolesExists(
+            roleNames.map((roleName) => ({ name: roleName })),
+          );
+
+        if (eitherValidateRolesExists instanceof Left) {
+          return left(eitherValidateRolesExists.value);
+        }
+
+        // Array of role promises
+        const eitherRolePromises = roleNames.map((roleName) => {
+          return this.rolesRepositoryService.readRole(
+            new ReadRoleRepositoryDto({
+              name: roleName,
+            }),
+          );
+        });
+
+        // Wait for all promises to resolve
+        const rolesSearched = (await Promise.all(eitherRolePromises)).map(
+          (eitherRole) => {
+            if (eitherRole instanceof Left) {
+              throw eitherRole;
+            }
+
+            if (eitherRole.value === undefined) {
+              throw new RoleNotFoundError(
+                roleNames.map((roleName) => ({ name: roleName })),
+              );
+            }
+
+            return eitherRole.value;
+          },
+        );
+
+        // Create user
+        const eitherCreateUser = await this.usersRepositoryService.createUser(
+          new CreateUserRepositoryDto({
+            ...validatedUserData.toObject(),
+            password: await this.cryptoHelperService.hashPassword(
+              validatedUserData.password,
+            ),
+          }),
+        );
+
+        if (eitherCreateUser instanceof Left) {
+          return left(eitherCreateUser.value);
+        }
+
+        // Define user roles
+        const searchedRoleIds = rolesSearched.map((role) => role.id);
+        const definedRoles = await Promise.all(
+          searchedRoleIds.map((roleId) =>
+            this.userRolesRepositoryService.createUserRole(
+              new CreateUserRoleRepositoryDto({
+                user_id: validatedUserData.id,
+                role_id: roleId,
+                createdAt,
+                updatedAt,
+              }),
+            ),
+          ),
+        );
+
+        for (const role of definedRoles) {
+          if (role instanceof Left) {
+            throw role.value;
+          }
+        }
+
+        return right(eitherCreateUser.value);
+      } catch (error) {
+        if (error instanceof RoleNotFoundError) {
+          console.warn('CreateUserUseCase error: execute');
+          console.warn(error);
+
+          return left(error);
+        }
+
+        console.error('CreateUserUseCase error: execute');
+        console.error(error);
+
+        return left(new InternalServerError());
+      }
     } catch (error) {
-      if (error instanceof RoleNotFoundError) {
-        console.warn('CreateUserUseCase error: execute');
-        console.warn(error);
-
-        return left(error);
-      }
-
       console.error('CreateUserUseCase error: execute');
       console.error(error);
 

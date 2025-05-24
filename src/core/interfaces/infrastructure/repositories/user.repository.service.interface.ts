@@ -1,40 +1,32 @@
-import { AbstractCreateUserRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/create-user-repository.dto.abstract';
-import { AbstractReadUserRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/read-user-repository.dto.abstract';
-import { AbstractUpdateUserRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/update-user-repository.dto.abstract';
-import { AbstractDeleteUserRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/delete-user-repository.dto.abstract';
-import { AbstractSearchUsersRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/search-users-repository.dto.abstract';
-import { AbstractSearchUsersRepositoryResultDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/search-users-repository-result.dto.abstract';
-import { AbstractUserRepositoryDto } from '@/core/abstractions/infrastructure/dtos/repositories/users/user-repository.dto.abstract';
-
 import { Either } from '@/shared/either';
 
 import { InternalServerError } from '@/core/errors/InternalServerError.error';
 import { CreateUserRepositoryError } from '@/core/errors/repositories/users/CreateUserRepositoryError.error';
+import { CreateUserRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/create-user-repository.dto';
+import { UserRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/user-repository.dto';
+import { ReadUserRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/read-user-repository.dto';
+import { UpdateUserRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/update-user-repository.dto';
+import { DeleteUserRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/delete-user-repository.dto';
+import { SearchUsersRepositoryDto } from '@/infrastructure/dtos/persistence/repositories/users/search-users-repository.dto';
+import { SearchUsersRepositoryResultDto } from '@/infrastructure/dtos/persistence/repositories/users/search-users-repository-result.dto';
 
 export interface IUsersRepositoryService {
   createUser(
-    dto: AbstractCreateUserRepositoryDto,
+    dto: CreateUserRepositoryDto,
   ): Promise<
-    Either<
-      InternalServerError | CreateUserRepositoryError,
-      AbstractUserRepositoryDto
-    >
+    Either<InternalServerError | CreateUserRepositoryError, UserRepositoryDto>
   >;
   readUser(
-    dto: AbstractReadUserRepositoryDto,
-  ): Promise<
-    Either<InternalServerError, AbstractUserRepositoryDto | undefined>
-  >;
+    dto: ReadUserRepositoryDto,
+  ): Promise<Either<InternalServerError, UserRepositoryDto | undefined>>;
   updateUser(
-    dto: AbstractUpdateUserRepositoryDto,
-  ): Promise<Either<InternalServerError, AbstractUserRepositoryDto>>;
+    dto: UpdateUserRepositoryDto,
+  ): Promise<Either<InternalServerError, UserRepositoryDto>>;
   deleteUser(
-    dto: AbstractDeleteUserRepositoryDto,
+    dto: DeleteUserRepositoryDto,
   ): Promise<Either<InternalServerError, boolean>>;
 
   searchUsers(
-    dto: AbstractSearchUsersRepositoryDto,
-  ): Promise<
-    Either<InternalServerError, AbstractSearchUsersRepositoryResultDto>
-  >;
+    dto: SearchUsersRepositoryDto,
+  ): Promise<Either<InternalServerError, SearchUsersRepositoryResultDto>>;
 }

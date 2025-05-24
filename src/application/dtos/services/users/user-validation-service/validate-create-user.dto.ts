@@ -1,8 +1,11 @@
-import { AbstractValidateCreateUserDto } from '@/core/abstractions/application/dtos/services/users/user-validation-service/validate-create-user.dto.interface';
+import { AbstractAutoSerializableClass } from '@/core/abstractions/@base/auto-serializable-class.abstract';
 import { IValidateCreateUserDto } from '@/core/interfaces/application/dtos/services/users/user-validation-service/validate-create-user.dto.interface';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class ValidateCreateUserDto extends AbstractValidateCreateUserDto {
+export class ValidateCreateUserDto
+  extends AbstractAutoSerializableClass<IValidateCreateUserDto>
+  implements IValidateCreateUserDto
+{
   @ApiProperty({
     type: 'string',
     description: 'The user uuid',
