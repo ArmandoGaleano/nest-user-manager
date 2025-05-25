@@ -7,11 +7,11 @@ import { UserLastNameSchema } from '@/core/schemas/@common/user/user-last-name';
 import { UserBirthdateSchema } from '@/core/schemas/@common/user/user-birthdate.schema';
 import { UserCPFSchema } from '@/core/schemas/@common/user/user-cpf.schema';
 import { UserCNPJSchema } from '@/core/schemas/@common/user/user-cnpj.schema';
-import { TimestampSchema } from '@/core/schemas/@common/timestamp.schema';
 
 import { EnumUserModelDocument } from '@/infrastructure/persistence/database-models/user.enum';
 import { RoleNameListSchema } from '@/core/schemas/@common/roles/role-name-list.schema';
 import { PageNumberSchema } from '@/core/schemas/@common/page-number.schema';
+import { DateSchema } from '@/core/schemas/@common/date.schema';
 
 const baseSearchUserRepositorySchema = z.object({
   id: new UuidSchema().schema.optional(),
@@ -19,12 +19,12 @@ const baseSearchUserRepositorySchema = z.object({
   firstName: new UserFirstNameSchema().schema.optional(),
   lastName: new UserLastNameSchema().schema.optional(),
   birthdate: new UserBirthdateSchema().schema.optional(),
-  createdAt: new TimestampSchema().schema.optional(),
-  createdAtStart: new TimestampSchema().schema.optional(),
-  createdAtEnd: new TimestampSchema().schema.optional(),
-  updatedAt: new TimestampSchema().schema.optional(),
-  updatedAtStart: new TimestampSchema().schema.optional(),
-  updatedAtEnd: new TimestampSchema().schema.optional(),
+  createdAt: new DateSchema().schema.optional(),
+  createdAtStart: new DateSchema().schema.optional(),
+  createdAtEnd: new DateSchema().schema.optional(),
+  updatedAt: new DateSchema().schema.optional(),
+  updatedAtStart: new DateSchema().schema.optional(),
+  updatedAtEnd: new DateSchema().schema.optional(),
   roleNames: new RoleNameListSchema().schema.optional(),
   page: new PageNumberSchema().schema.optional(),
 });

@@ -52,7 +52,7 @@ printf "       🔧 Aplicando migrations (Knex)...
 "
 printf "========================================
 "
-npx knex migrate:latest --knexfile="$PROJECT_ROOT/dist/src/infrastructure/persistence/knex/knexfile.js"
+npx knex migrate:latest --knexfile="$PROJECT_ROOT/dist/infrastructure/persistence/knex/knexfile.js"
 printf "
 \033[1;32m🟢  Migrations aplicadas com sucesso!\033[0m
 "
@@ -65,7 +65,7 @@ printf "         🌱 Executando seeds (Knex)...
 "
 printf "========================================
 "
-npx knex seed:run --knexfile="$PROJECT_ROOT/dist/src/infrastructure/persistence/knex/knexfile.js"
+npx knex seed:run --knexfile="$PROJECT_ROOT/dist/infrastructure/persistence/knex/knexfile.js"
 printf "
 \033[1;32m🟢  Seeds executados com sucesso!\033[0m
 "

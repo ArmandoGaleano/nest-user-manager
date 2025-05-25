@@ -2,7 +2,7 @@ import { Uuid } from '@/shared/value-objects/Uuid';
 import { Permission } from '@/domain/role/entities/permission.entity';
 
 export type RolePropsType = {
-  id?: Uuid;
+  id: Uuid;
   name: string; // 'ADMIN', 'RESTRICTED_ADMIN', 'USER', etc.
   description: string; // 'Administrator', 'Restricted Administrator', 'Standard user', etc.
   permissions: Permission[];

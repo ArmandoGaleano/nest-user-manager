@@ -8,9 +8,9 @@ import { UserLastNameSchema } from '@/core/schemas/@common/user/user-last-name';
 import { UserBirthdateSchema } from '@/core/schemas/@common/user/user-birthdate.schema';
 import { UserCPFSchema } from '@/core/schemas/@common/user/user-cpf.schema';
 import { UserCNPJSchema } from '@/core/schemas/@common/user/user-cnpj.schema';
-import { TimestampSchema } from '@/core/schemas/@common/timestamp.schema';
 
 import { EnumUserModelDocument } from '@/infrastructure/persistence/database-models/user.enum';
+import { DateSchema } from '@/core/schemas/@common/date.schema';
 
 const baseCreateUserRepositorySchema = z.object({
   id: new UuidSchema().schema,
@@ -19,8 +19,8 @@ const baseCreateUserRepositorySchema = z.object({
   firstName: new UserFirstNameSchema().schema,
   lastName: new UserLastNameSchema().schema,
   birthdate: new UserBirthdateSchema().schema,
-  createdAt: new TimestampSchema().schema,
-  updatedAt: new TimestampSchema().schema,
+  createdAt: new DateSchema().schema,
+  updatedAt: new DateSchema().schema,
 });
 
 const cpfUserSchema = baseCreateUserRepositorySchema.extend({

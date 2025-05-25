@@ -7,8 +7,8 @@ export interface UsersModel {
   birthdate: string; // YYYY-MM-DD
   document: string; // CPF string or CNPJ string
   documentType: UserModelDocumentType; // 'CPF' or 'CNPJ'
-  createdAt: number; // Timestamp
-  updatedAt: number; // Timestamp
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export type UserModelDocumentType = 'CPF' | 'CNPJ';

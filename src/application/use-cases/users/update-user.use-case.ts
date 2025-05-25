@@ -38,7 +38,7 @@ export class UpdateUserUseCase implements IUpdateUserUseCase {
         await this.userValidationService.validateUpdateUser(
           new UpdateUserRepositoryDto({
             ...dto.toObject(),
-            updatedAt: this.systemDateTimeHelperService.getTimestamp(),
+            updatedAt: this.systemDateTimeHelperService.getDate(),
           }),
         );
 

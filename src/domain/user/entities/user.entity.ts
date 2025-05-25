@@ -37,8 +37,8 @@ export class UserEntity
     return this._props.updatedAt;
   }
 
-  set updatedAt(timestamp: number) {
-    this._props.updatedAt = timestamp;
+  set updatedAt(date: Date) {
+    this._props.updatedAt = date;
   }
 
   constructor(private _props: IUserEntity) {

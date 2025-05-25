@@ -10,7 +10,7 @@ import { SystemDateTimeHelperService } from '@/shared/helpers/system-date-time/s
     },
     {
       provide: CryptoHelperService,
-      useValue: new CryptoHelperService(),
+      useClass: CryptoHelperService,
     },
   ],
   exports: [SystemDateTimeHelperService, CryptoHelperService],

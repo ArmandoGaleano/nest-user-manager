@@ -5,8 +5,13 @@ import { ReadUserUseCase } from '@/application/use-cases/users/read-user.use-cas
 import { UpdateUserUseCase } from '@/application/use-cases/users/update-user.use-case';
 import { DeleteUserUseCase } from '@/application/use-cases/users/delete-user.use-case';
 import { SearchUsersUseCase } from '@/application/use-cases/users/search-users.use-case';
+import { AuthService } from '@/application/services/auth/auth.service';
 
 export const useCaseProviders: Provider[] = [
+  {
+    provide: AuthService,
+    useClass: AuthService,
+  },
   {
     provide: CreateUserUseCase,
     useClass: CreateUserUseCase,

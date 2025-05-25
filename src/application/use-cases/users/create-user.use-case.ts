@@ -56,8 +56,8 @@ export class CreateUserUseCase implements ICreateUserUseCase {
       const { roleNames } = eitherValidateCreateUserUseCaseDto.value;
 
       const userId = this.cryptoHelperService.generateUUID();
-      const createdAt = this.systemDateTimeHelperService.getTimestamp();
-      const updatedAt = this.systemDateTimeHelperService.getTimestamp();
+      const createdAt = this.systemDateTimeHelperService.getDate();
+      const updatedAt = this.systemDateTimeHelperService.getDate();
 
       try {
         // Validate repository DTO schema and validate user existence
