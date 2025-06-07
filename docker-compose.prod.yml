@@ -32,8 +32,7 @@ services:
       - certs-production:/etc/letsencrypt
       - certbot-var:/var/lib/letsencrypt
       - webroot:/var/www/letsencrypt
-    entrypoint: >
-      sh -c "certbot certonly --webroot --webroot-path=/var/www/letsencrypt --email ${LETSENCRYPT_EMAIL} --agree-tos --no-eff-email -d ${DOMAIN} && crond -f"
+    entrypoint: sh -c "printf '0 3 * * * certbot renew --webroot --webroot-path=/var/www/letsencrypt --quiet --deploy-hook \"nginx -s reload\"\n' > /etc/crontabs/root && certbot certonly --webroot --webroot-path=/var/www/letsencrypt --email ${LETSENCRYPT_EMAIL} --agree-tos --no-eff-email -d ${DOMAIN} -d www.${DOMAIN} && crond -f"
 
     depends_on:
       - nginx_service
