@@ -29,7 +29,6 @@ services:
     volumes:
       - certs-production:/etc/letsencrypt
       - certbot-var:/var/lib/letsencrypt
-      - ./docker/nginx/letsencrypt:/var/www/letsencrypt
     entrypoint: >
       sh -c "certbot certonly --webroot --webroot-path=/var/www/letsencrypt --email ${LETSENCRYPT_EMAIL} --agree-tos --no-eff-email -d ${DOMAIN} && crond -f"
 
