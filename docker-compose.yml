@@ -68,11 +68,11 @@ volumes:
   postgres_data:
     driver: local
   certs-production:
-    external: true
+    driver: local
   certbot-var:
-    external: true
-  webroot:
-    external: true
+    driver: local
+  webroot: 
+    driver: local
 
 networks:
   frontend_network:
