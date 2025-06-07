@@ -19,6 +19,7 @@ services:
   nginx_service:
     volumes:
       - ./docker/nginx/nginx.production.conf:/etc/nginx/conf.d/default.conf
+      - ./docker/nginx/certs/dhparam.pem:/etc/nginx/certs/dhparam.pem
       - certs-production:/etc/letsencrypt
       - webroot:/var/www/letsencrypt
     ports:
