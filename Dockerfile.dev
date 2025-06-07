@@ -4,6 +4,9 @@ FROM node:20.18.0
 # Instala o Yarn globalmente no container
 RUN corepack enable && corepack prepare yarn@stable --activate
 
+# Instala o cliente PostgreSQL no container para rodar `pg_isready`
+RUN apt-get update && apt-get install -y postgresql-client
+
 # Cria usuário e grupo sem privilégios
 RUN addgroup --system app && \
     adduser   --system --ingroup app --disabled-password --gecos "" appuser
@@ -12,14 +15,20 @@ RUN addgroup --system app && \
 WORKDIR /nest-user-manager
 
 # Copia o projeto para dentro do container
-COPY ./dist /nest-user-manager/src
+COPY ./dist /nest-user-manager/dist
 COPY ./scripts /nest-user-manager/scripts
+COPY ./src /nest-user-manager/src
+COPY ./test /nest-user-manager/test
+COPY ./nest-cli.json /nest-user-manager/nest-cli.json
+COPY ./.prettierrc /nest-user-manager/.prettierrc
+COPY ./eslint.config.mjs /nest-user-manager/eslint.config.mjs
+COPY ./tsconfig.json /nest-user-manager/tsconfig.json
 COPY ./package.json /nest-user-manager/package.json
 COPY ./yarn.lock /nest-user-manager/yarn.lock
 
 RUN yarn install
 
 # Torna o script executável
-RUN chmod +x scripts/setup/production.sh
+RUN chmod +x scripts/setup/development.sh
 
-ENTRYPOINT ["sh", "scripts/setup/production.sh"]
+ENTRYPOINT ["sh", "scripts/setup/development.sh"]

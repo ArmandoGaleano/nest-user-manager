@@ -1,44 +1,79 @@
+version: "3.9"
 name: nest-user-manager
 
 services:
+  # ========== POSTGRES ==========
   postgres_db:
     image: postgres:15.10
     container_name: postgres_db
-    profiles: ["default"]
     restart: always
-    # set shared memory limit when using docker-compose
     shm_size: 128mb
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
+      - ./docker/postgres/init-user.sh:/docker-entrypoint-initdb.d/init-user.sh
+      - ./docker/postgres/postgresql.conf:/etc/postgresql/postgresql.conf
+      - ./docker/postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf
     env_file:
       - .env
-
     networks:
-      - backend_network
+      backend_network:
+        aliases:
+          - postgres_db
+      
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
+  # ========== NODE ==========
   node_nest_app:
     container_name: node_nest_app
-    profiles: ["default"]
+    profiles: ["development","production"]
     build:
       context: .
       dockerfile: Dockerfile
     env_file:
       - .env
-
     networks:
-      - frontend_network
-      - backend_network
-
+      backend_network:
+        aliases:
+          - node_nest_app
+      frontend_network:
+        aliases:
+          - node_nest_app
     depends_on:
       - postgres_db
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ========== NGINX ==========
+  nginx_service:
+    image: nginx:1.27.3
+    container_name: nginx_service
+    profiles: ["development","production"]
+    env_file:
+      - .env
+    networks:
+      frontend_network:
+        aliases:
+          - nginx_service
+    depends_on:
+      - node_nest_app
+
+volumes:
+  postgres_data:
+    driver: local
+  certs-production:
+    driver: local
+  certbot-var:
+    driver: local
 
 networks:
   frontend_network:
     driver: bridge
   backend_network:
     driver: bridge
-
-volumes:
-  postgres_data:
-    driver: local # Definição do volume mysql_data

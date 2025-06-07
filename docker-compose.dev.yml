@@ -1,11 +1,56 @@
-name: nest-user-manager
+version: '3.9'
 
 services:
   postgres_db:
-    profiles: ["development"]
+    profiles: ['development']
+    mem_limit: 1g
+    cpus: 1.0
     networks:
-      backend_network:
-        aliases:
-          - postgres_db
+      - backend_network
+    expose:
+      - '5432'
+
+  node_nest_app:
+    profiles: ['development']
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+    - ./src:/nest-user-manager/src
+    stdin_open: ${NODE_STDIN_OPEN:-false}
+    mem_limit: 1g
+    cpus: 1.0
+    tty: ${NODE_TTY:-false}
+    expose:
+      - '3000'
+
+  nginx_service:
+    image: nginx:1.27.3
+    container_name: nginx_service
+    profiles: ['development']
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - ./docker/nginx/nginx.${NODE_ENV:-development}.conf:/etc/nginx/conf.d/nginx.dev.conf
+      - ./docker/nginx/certs:/etc/nginx/dev/certs
+    mem_limit: 1g
+    cpus: 1.0
     ports:
-      - '5432:5432'
+      - '80:80'
+      - '443:443'
+    depends_on:
+      - postgres_db
+      - node_nest_app
+    networks:
+      - frontend_network
+
+networks:
+  frontend_network:
+    driver: bridge
+  backend_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local

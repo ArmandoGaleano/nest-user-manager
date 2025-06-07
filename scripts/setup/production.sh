@@ -26,11 +26,13 @@ printf "
 echo "$POSTGRES_HOST"
 echo "$NODE_ENV"
 
-# Loop para testar a conexão com o banco usando pg_isready, passando a senha
-until PGPASSWORD="$POSTGRES_PASSWORD" pg_isready -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "$POSTGRES_USER"; do
-  echo "🔵 Aguardando PostgreSQL ($POSTGRES_HOST:$POSTGRES_PORT) ficar pronto..."
-  sleep 5
-done
+# ─── 2. Esperar PostgreSQL ──────────────────────────────────────────────────────
+printf "
+🔵  Aguardando PostgreSQL em $POSTGRES_HOST:$POSTGRES_PORT...
+"
+node "$PROJECT_ROOT/scripts/utils/wait-for-postgres.mjs"
+printf "\033[1;32m🟢  PostgreSQL está pronto para conexões!\033[0m
+"
 
 
 # ─── 3. Aplicar migrations (Knex) ────────────────────────────────────────────────
@@ -41,7 +43,7 @@ printf "       🔧 Aplicando migrations (Knex)...
 "
 printf "========================================
 "
-npx knex migrate:latest --knexfile="$PROJECT_ROOT/src/infrastructure/persistence/knex/knexfile.js"
+yarn knex migrate:latest --knexfile="$PROJECT_ROOT/src/infrastructure/persistence/knex/knexfile.js"
 printf "
 \033[1;32m🟢  Migrations aplicadas com sucesso!\033[0m
 "
@@ -54,7 +56,7 @@ printf "         🌱 Executando seeds (Knex)...
 "
 printf "========================================
 "
-npx knex seed:run --knexfile="$PROJECT_ROOT/dist/infrastructure/persistence/knex/knexfile.js"
+yarn knex seed:run --knexfile="$PROJECT_ROOT/src/infrastructure/persistence/knex/knexfile.js"
 printf "
 \033[1;32m🟢  Seeds executados com sucesso!\033[0m
 "
@@ -64,4 +66,4 @@ printf "
 🚀  Iniciando Servidor...
 "
 cd /nest-user-manager
-node ./src/main.js
+exec su -s /bin/sh -c "node $PROJECT_ROOT/src/main.js" appuser

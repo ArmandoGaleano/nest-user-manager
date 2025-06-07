@@ -5,9 +5,9 @@ const config: { [key: string]: Knex.Config } = {
     client: 'postgresql',
     connection: {
       host: 'localhost',
-      database: process?.env?.POSTGRES_DB ?? 'postgres_db',
-      user: process?.env?.POSTGRES_USER ?? 'root',
-      password: process?.env?.POSTGRES_PASSWORD ?? 'postgrespassword',
+      database: process?.env?.POSTGRES_DB ?? 'POSTGRES_DB not set',
+      user: process?.env?.APP_DB_USER ?? 'POSTGRES_DB not set',
+      password: process?.env?.APP_DB_PASSWORD ?? 'POSTGRES_DB not set',
       port: 5432,
     },
     pool: {
@@ -27,10 +27,10 @@ const config: { [key: string]: Knex.Config } = {
   development: {
     client: 'postgresql',
     connection: {
-      host: process?.env?.POSTGRES_HOST ?? 'postgres_db',
-      database: process?.env?.POSTGRES_DB ?? 'postgres_db',
-      user: process?.env?.POSTGRES_USER ?? 'root',
-      password: process?.env?.POSTGRES_PASSWORD ?? 'postgrespassword',
+      host: process?.env?.POSTGRES_HOST ?? 'POSTGRES_HOST not set',
+      database: process?.env?.POSTGRES_DB ?? 'POSTGRES_DB not set',
+      user: process?.env?.APP_DB_USER ?? 'APP_DB_USER not set',
+      password: process?.env?.APP_DB_PASSWORD ?? 'APP_DB_PASSWORD not set',
       port: 5432,
     },
     pool: {
@@ -51,10 +51,10 @@ const config: { [key: string]: Knex.Config } = {
   staging: {
     client: 'postgresql',
     connection: {
-      host: process?.env?.POSTGRES_HOST ?? 'postgres_db',
-      database: process?.env?.POSTGRES_DB ?? 'postgres_db',
-      user: process?.env?.POSTGRES_USER ?? 'root',
-      password: process?.env?.POSTGRES_PASSWORD ?? 'postgrespassword',
+      host: process?.env?.POSTGRES_HOST ?? 'POSTGRES_HOST not set',
+      database: process?.env?.POSTGRES_DB ?? 'POSTGRES_DB not set',
+      user: process?.env?.APP_DB_USER ?? 'APP_DB_USER not set',
+      password: process?.env?.APP_DB_PASSWORD ?? 'APP_DB_PASSWORD not set',
       port: 5432,
     },
     pool: {
@@ -75,10 +75,10 @@ const config: { [key: string]: Knex.Config } = {
   production: {
     client: 'postgresql',
     connection: {
-      host: process?.env?.POSTGRES_HOST ?? 'postgres_db',
-      database: process?.env?.POSTGRES_DB ?? 'postgres_db',
-      user: process?.env?.POSTGRES_USER ?? 'root',
-      password: process?.env?.POSTGRES_PASSWORD ?? 'postgrespassword',
+      host: process?.env?.POSTGRES_HOST ?? 'POSTGRES_HOST not set',
+      database: process?.env?.POSTGRES_DB ?? 'POSTGRES_DB not set',
+      user: process?.env?.APP_DB_USER ?? 'APP_DB_USER not set',
+      password: process?.env?.APP_DB_PASSWORD ?? 'APP_DB_PASSWORD not set',
       port: 5432,
     },
     pool: {

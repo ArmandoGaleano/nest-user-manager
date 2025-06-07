@@ -1,97 +1,40 @@
-name: nest-user-manager
+version: '3.9'
 
 services:
   postgres_db:
-    profiles: ['development', production']
-    deploy:
-      resources:
-        limits:
-          cpus: ${POSTGRES_CPU_LIMIT}
-          memory: ${POSTGRES_MEM_LIMIT}
-        reservations:
-          cpus: ${POSTGRES_CPU_RESERVE}
-          memory: ${POSTGRES_MEM_RESERVE}
-
     expose:
       - '5432'
-
   node_nest_app:
-    profiles: ['development', 'production']
+    profiles: ['production']
+    build:
+      context: .
+      dockerfile: Dockerfile
     stdin_open: ${NODE_STDIN_OPEN:-false}
+    mem_limit: 1g
+    cpus: 1.0
     tty: ${NODE_TTY:-false}
-    logging:
-      driver: json-file
-      options:
-        max-size: '10m'
-        max-file: '3'
-    deploy:
-      resources:
-        limits:
-          cpus: ${NODE_CPU_LIMIT}
-          memory: ${NODE_MEM_LIMIT}
-        reservations:
-          cpus: ${NODE_CPU_RESERVE}
-          memory: ${NODE_MEM_RESERVE}
-    expose: 
+    expose:
       - '3000'
 
   nginx_service:
-    image: nginx:1.27.3
-    container_name: nginx_service
-    profiles: ['development', 'production']
-    restart: always
-    env_file:
-      - .env
-
     volumes:
-      - ./docker/nginx/nginx.${NODE_ENV:-development}.conf:/etc/nginx/conf.d/nginx.dev.conf # Configuração do NGINX
-      - ./docker/nginx/certs:/etc/nginx/dev/certs # Certificados SSL de desenvolvimento
-      - certs-production:/etc/nginx/certs # Certificados SSL de produção
+      - ./docker/nginx/nginx.production.conf:/etc/nginx/conf.d/default.conf
+      - certs-production:/etc/nginx/certs
     ports:
-      - '443:443' # HTTPS
-      - '80:80' # HTTP para redirecionamento
-    depends_on:
-      - postgres_db
-      - node_nest_app
-    networks:
-      - frontend_network
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 1G
-        reservations:
-          cpus: '0.5'
-          memory: 512M
+      - '80:80'
+      - '443:443'
   certbot:
     image: certbot/certbot:latest
-    profiles: ['production']
     container_name: certbot
     volumes:
       - certs-production:/etc/letsencrypt
       - certbot-var:/var/lib/letsencrypt
       - ./docker/nginx/letsencrypt:/var/www/letsencrypt
-    command: >
-      sh -c "certbot certonly --webroot \
-        --webroot-path=/var/www/letsencrypt \
-        --email ${LETSENCRYPT_EMAIL} \
-        --agree-tos \
-        --no-eff-email \
-        -d ${DOMAIN} && crond -f"
+    entrypoint: >
+      sh -c "certbot certonly --webroot --webroot-path=/var/www/letsencrypt --email ${LETSENCRYPT_EMAIL} --agree-tos --no-eff-email -d ${DOMAIN} && crond -f"
+
+    depends_on:
+      - nginx_service
+
     networks:
       - frontend_network
-    environment:
-      DOMAIN: ${DOMAIN}
-      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
-
-networks:
-  frontend_network:
-    driver: bridge
-  backend_network:
-    driver: bridge
-
-volumes:
-  postgres_data:
-    driver: local # Definição do volume mysql_data
-  certs-production:
-  certbot-var:
