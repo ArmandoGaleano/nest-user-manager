@@ -71,6 +71,8 @@ volumes:
     driver: local
   certbot-var:
     driver: local
+  webroot: 
+    driver: local
 
 networks:
   frontend_network:
