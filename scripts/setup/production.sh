@@ -30,7 +30,7 @@ echo "$NODE_ENV"
 printf "
 🔵  Aguardando PostgreSQL em $POSTGRES_HOST:$POSTGRES_PORT...
 "
-node "$PROJECT_ROOT/scripts/utils/wait-for-postgres.mjs"
+yarn node "$PROJECT_ROOT/scripts/utils/wait-for-postgres.mjs"
 printf "\033[1;32m🟢  PostgreSQL está pronto para conexões!\033[0m
 "
 
@@ -66,4 +66,4 @@ printf "
 🚀  Iniciando Servidor...
 "
 cd /nest-user-manager
-exec su -s /bin/sh -c "node $PROJECT_ROOT/src/main.js" appuser
+exec su -s /bin/sh -c "yarn node $PROJECT_ROOT/src/main.js" appuser
