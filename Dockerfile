@@ -6,7 +6,9 @@ RUN corepack enable && corepack prepare yarn@stable --activate
 
 # Cria usuário e grupo sem privilégios
 RUN addgroup --system app && \
-    adduser --system --ingroup app --disabled-password --gecos "" appuser
+    useradd --system --create-home --home-dir /home/appuser --gid app appuser
+
+ENV HOME=/home/appuser
 
 # Define o diretório de trabalho
 WORKDIR /nest-user-manager
