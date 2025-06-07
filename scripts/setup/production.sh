@@ -66,4 +66,4 @@ printf "
 🚀  Iniciando Servidor...
 "
 cd /nest-user-manager
-exec su -s /bin/sh -c "node $PROJECT_ROOT/src/main.js" appuser
+exec yarn node $PROJECT_ROOT/src/main.js
