@@ -67,12 +67,16 @@ services:
 volumes:
   postgres_data:
     driver: local
+    name: postgres_data
   certs-production:
     driver: local
+    name: certs-production
   certbot-var:
     driver: local
+    name: certbot-var
   webroot: 
     driver: local
+    name: webroot
 
 networks:
   frontend_network:
